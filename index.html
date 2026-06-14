@@ -331,245 +331,165 @@
             appId: "1:143468043547:web:d95ac479225530fb9887be"
         };
         
-        // Inizializza Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
         
         // ========== VARIABILI GLOBALI ==========
         let players = [], matches = [], playersPerTeam = 5, cropper = null, pendingPhoto = null, editingMatchId = null, goalsData = { A: [], B: [] }, seasonName = "Stagione 2024/2025", teamSettings = { nameA: 'Squadra A', logoA: null, nameB: 'Squadra B', logoB: null };
-        let isLoggedIn = false;
-        let isAdminMode = false;
-        let currentUser = null;
-        let currentCampionatoId = null;
-        let currentCampionatoNome = null;
-        let pendingSaveCallback = null;
-        let currentFirebaseUser = null;
+        let isLoggedIn = false, isAdminMode = false, currentUser = null, currentCampionatoId = null, currentCampionatoNome = null, pendingSaveCallback = null, currentFirebaseUser = null;
         
-        function showLoading(show) {
-            const loader = document.getElementById('loadingOverlay');
-            if (loader) loader.style.display = show ? 'flex' : 'none';
+        function showLoading(show) { document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none'; }
+        
+        // ========== FUNZIONI SALVATAGGIO SU FIRESTORE ==========
+        async function saveCampionatoDataToFirestore() {
+            if (currentCampionatoId && currentUser && isAdminMode) {
+                try {
+                    await db.collection('users').doc(currentUser.firebaseUid)
+                        .collection('campionati').doc(currentCampionatoId).set({
+                            players: players,
+                            matches: matches,
+                            playersPerTeam: playersPerTeam,
+                            teamSettings: teamSettings,
+                            seasonName: seasonName,
+                            updatedAt: new Date().toISOString()
+                        }, { merge: true });
+                    console.log("✅ Dati salvati su Firebase:", { players: players.length, matches: matches.length });
+                    await updateCampionatoStats();
+                } catch (error) {
+                    console.error("❌ Errore salvataggio:", error);
+                }
+            }
         }
         
-        // ========== GESTIONE UTENTI CON FIREBASE ==========
+        async function loadCampionatoDataFromFirestore(campionatoId) {
+            if (!currentUser) return null;
+            try {
+                const doc = await db.collection('users').doc(currentUser.firebaseUid)
+                    .collection('campionati').doc(campionatoId).get();
+                return doc.exists ? doc.data() : null;
+            } catch(e) { return null; }
+        }
+        
+        async function updateCampionatoStats() {
+            if (currentCampionatoId && currentUser) {
+                const userRef = db.collection('users').doc(currentUser.firebaseUid);
+                const userDoc = await userRef.get();
+                const campionati = userDoc.data()?.campionati || [];
+                const index = campionati.findIndex(c => c.id === currentCampionatoId);
+                if (index !== -1) {
+                    campionati[index].stats = { giocatori: players.length, partite: matches.length };
+                    await userRef.update({ campionati });
+                    currentUser.campionati = campionati;
+                }
+            }
+        }
+        
+        // ========== FUNZIONI UTENTE CON FIREBASE ==========
         async function registerUser() {
             const username = document.getElementById('regUsername').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value;
             const adminPassword = document.getElementById('regAdminPassword').value;
             const errorDiv = document.getElementById('loginError');
-            
             if (!username || !email || !password || !adminPassword) {
                 errorDiv.textContent = 'Compila tutti i campi';
                 errorDiv.style.display = 'block';
                 setTimeout(() => errorDiv.style.display = 'none', 3000);
                 return;
             }
-            
-            if (!email.includes('@')) {
-                errorDiv.textContent = 'Inserisci un email valida';
-                errorDiv.style.display = 'block';
-                setTimeout(() => errorDiv.style.display = 'none', 3000);
-                return;
-            }
-            
             showLoading(true);
-            
             try {
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const firebaseUid = userCredential.user.uid;
-                
-                await db.collection('users').doc(firebaseUid).set({
-                    username: username,
-                    email: email,
-                    adminPassword: adminPassword,
-                    campionati: [],
-                    createdAt: new Date().toISOString()
+                await db.collection('users').doc(userCredential.user.uid).set({
+                    username, email, adminPassword, campionati: [], createdAt: new Date().toISOString()
                 });
-                
                 showAlert('Registrazione completata! Ora puoi accedere.', 'success');
                 hideRegisterForm();
             } catch (error) {
-                console.error("Errore registrazione:", error);
-                if (error.code === 'auth/email-already-in-use') {
-                    errorDiv.textContent = 'Email già registrata!';
-                } else {
-                    errorDiv.textContent = 'Errore: ' + error.message;
-                }
+                errorDiv.textContent = error.code === 'auth/email-already-in-use' ? 'Email già registrata!' : 'Errore: ' + error.message;
                 errorDiv.style.display = 'block';
                 setTimeout(() => errorDiv.style.display = 'none', 3000);
-            } finally {
-                showLoading(false);
-            }
+            } finally { showLoading(false); }
         }
         
         async function performLogin() {
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
             const errorDiv = document.getElementById('loginError');
-            
             if (!username || !password) {
                 errorDiv.textContent = 'Inserisci username e password';
                 errorDiv.style.display = 'block';
                 setTimeout(() => errorDiv.style.display = 'none', 3000);
                 return;
             }
-            
             showLoading(true);
-            
             try {
                 const usersSnapshot = await db.collection('users').where('username', '==', username).get();
-                
-                if (usersSnapshot.empty) {
-                    throw new Error('Username non trovato');
-                }
-                
+                if (usersSnapshot.empty) throw new Error('Username non trovato');
                 const userData = usersSnapshot.docs[0].data();
-                const email = userData.email;
-                
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                const firebaseUid = userCredential.user.uid;
-                
-                const userDoc = await db.collection('users').doc(firebaseUid).get();
-                const fullUserData = userDoc.data();
-                
+                const userCredential = await auth.signInWithEmailAndPassword(userData.email, password);
+                const fullData = (await db.collection('users').doc(userCredential.user.uid).get()).data();
                 currentUser = {
-                    username: fullUserData.username,
-                    email: fullUserData.email,
-                    adminPassword: fullUserData.adminPassword,
-                    campionati: fullUserData.campionati || [],
-                    firebaseUid: firebaseUid
+                    username: fullData.username, email: fullData.email, adminPassword: fullData.adminPassword,
+                    campionati: fullData.campionati || [], firebaseUid: userCredential.user.uid
                 };
-                
                 currentFirebaseUser = userCredential.user;
-                isLoggedIn = true;
-                isAdminMode = false;
-                localStorage.setItem('currentUser', JSON.stringify({ username: currentUser.username, firebaseUid: firebaseUid }));
-                
+                isLoggedIn = true; isAdminMode = false;
+                localStorage.setItem('currentUser', JSON.stringify({ username: currentUser.username, firebaseUid: currentUser.firebaseUid }));
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('userBar').style.display = 'flex';
                 document.getElementById('currentUsername').textContent = currentUser.username;
-                document.getElementById('roleBadge').innerHTML = '👁️ Solo Lettura';
-                document.getElementById('roleBadge').style.background = '#95a5a6';
-                
                 document.getElementById('campionatiView').style.display = 'block';
                 document.getElementById('mainApp').style.display = 'none';
-                document.getElementById('createCampBtn').style.display = 'none';
                 await loadUserCampionati();
                 updateAdminUI();
-                
-                const campionati = currentUser?.campionati || [];
-                if (campionati.length > 0) {
-                    caricaUltimoCampionato();
-                }
+                if (currentUser.campionati?.length > 0) caricaUltimoCampionato();
             } catch (error) {
-                console.error("Errore login:", error);
                 errorDiv.textContent = 'Username o password errati';
                 errorDiv.style.display = 'block';
                 setTimeout(() => errorDiv.style.display = 'none', 3000);
-            } finally {
-                showLoading(false);
-            }
+            } finally { showLoading(false); }
         }
         
         async function cambiaPassword() {
-            if (!isAdminMode) {
-                showAlert('Devi sbloccare la modalità Admin per cambiare le password!', 'error');
-                return;
-            }
-            
+            if (!isAdminMode) { showAlert('Devi sbloccare la modalità Admin!', 'error'); return; }
             const nuovaUserPw = document.getElementById('newUserPassword').value.trim();
             const nuovaAdminPw = document.getElementById('newAdminPassword').value.trim();
-            
-            if (!nuovaUserPw && !nuovaAdminPw) {
-                showAlert('Inserisci almeno una nuova password', 'error');
-                return;
-            }
-            
+            if (!nuovaUserPw && !nuovaAdminPw) { showAlert('Inserisci almeno una nuova password', 'error'); return; }
             showLoading(true);
-            
             try {
-                if (nuovaUserPw && currentFirebaseUser) {
-                    await currentFirebaseUser.updatePassword(nuovaUserPw);
-                }
-                
-                if (nuovaAdminPw && currentUser) {
-                    await db.collection('users').doc(currentUser.firebaseUid).update({
-                        adminPassword: nuovaAdminPw
-                    });
-                    currentUser.adminPassword = nuovaAdminPw;
-                }
-                
+                if (nuovaUserPw && currentFirebaseUser) await currentFirebaseUser.updatePassword(nuovaUserPw);
+                if (nuovaAdminPw && currentUser) await db.collection('users').doc(currentUser.firebaseUid).update({ adminPassword: nuovaAdminPw });
                 document.getElementById('newUserPassword').value = '';
                 document.getElementById('newAdminPassword').value = '';
-                
                 showAlert('✅ Password aggiornate con successo!', 'success');
-                
-                setTimeout(() => {
-                    if (confirm('Le password sono state cambiate. Vuoi uscire per rientrare con le nuove credenziali?')) {
-                        logout();
-                    }
-                }, 500);
-            } catch (error) {
-                console.error("Errore cambio password:", error);
-                showAlert('Errore durante il cambio password: ' + error.message, 'error');
-            } finally {
-                showLoading(false);
-            }
+                setTimeout(() => { if (confirm('Vuoi uscire per rientrare con le nuove credenziali?')) logout(); }, 500);
+            } catch (error) { showAlert('Errore: ' + error.message, 'error'); }
+            finally { showLoading(false); }
         }
         
         async function recoverPassword() {
             const email = document.getElementById('recoverEmail').value.trim();
             const resultDiv = document.getElementById('recoverResult');
-            
-            if (!email) {
-                resultDiv.innerHTML = '<span style="color:#e74c3c;">Inserisci la tua email!</span>';
-                return;
-            }
-            
+            if (!email) { resultDiv.innerHTML = '<span style="color:#e74c3c;">Inserisci la tua email!</span>'; return; }
             showLoading(true);
-            
             try {
                 await auth.sendPasswordResetEmail(email);
-                resultDiv.innerHTML = `
-                    <div style="background:#e8f8f5; padding:15px; border-radius:12px;">
-                        <p><i class="fas fa-envelope"></i> <strong>Email inviata a:</strong> ${email}</p>
-                        <p style="color:#2ecc71; margin-top:10px;"><i class="fas fa-info-circle"></i> Controlla la tua email per reimpostare la password.</p>
-                    </div>
-                `;
-            } catch (error) {
-                resultDiv.innerHTML = `<span style="color:#e74c3c;">Errore: ${error.message}</span>`;
-            } finally {
-                showLoading(false);
-            }
+                resultDiv.innerHTML = `<div style="background:#e8f8f5; padding:15px; border-radius:12px;"><p><i class="fas fa-envelope"></i> Email inviata a: ${email}</p><p style="color:#2ecc71;">Controlla la tua email per reimpostare la password.</p></div>`;
+            } catch (error) { resultDiv.innerHTML = `<span style="color:#e74c3c;">Errore: ${error.message}</span>`; }
+            finally { showLoading(false); }
         }
         
-        function showRegisterForm() {
-            document.getElementById('registerForm').style.display = 'block';
-            document.getElementById('recoverForm').style.display = 'none';
-        }
-        
-        function hideRegisterForm() {
-            document.getElementById('registerForm').style.display = 'none';
-        }
-        
-        function showRecoverForm() {
-            document.getElementById('recoverForm').style.display = 'block';
-            document.getElementById('registerForm').style.display = 'none';
-            document.getElementById('recoverResult').innerHTML = '';
-        }
-        
-        function hideRecoverForm() {
-            document.getElementById('recoverForm').style.display = 'none';
-        }
+        function showRegisterForm() { document.getElementById('registerForm').style.display = 'block'; document.getElementById('recoverForm').style.display = 'none'; }
+        function hideRegisterForm() { document.getElementById('registerForm').style.display = 'none'; }
+        function showRecoverForm() { document.getElementById('recoverForm').style.display = 'block'; document.getElementById('registerForm').style.display = 'none'; document.getElementById('recoverResult').innerHTML = ''; }
+        function hideRecoverForm() { document.getElementById('recoverForm').style.display = 'none'; }
         
         async function logout() {
             await auth.signOut();
-            currentUser = null;
-            currentCampionatoId = null;
-            currentFirebaseUser = null;
-            isLoggedIn = false;
-            isAdminMode = false;
+            currentUser = null; currentCampionatoId = null; currentFirebaseUser = null;
+            isLoggedIn = false; isAdminMode = false;
             localStorage.removeItem('currentUser');
             document.getElementById('loginOverlay').style.display = 'flex';
             document.getElementById('userBar').style.display = 'none';
@@ -578,89 +498,51 @@
         }
         
         // ========== MODALITÀ ADMIN ==========
-        function openAdminModal() {
-            document.getElementById('adminModal').style.display = 'flex';
-            document.getElementById('adminModalPassword').value = '';
-        }
-        
-        function closeAdminModal() {
-            document.getElementById('adminModal').style.display = 'none';
-        }
-        
+        function openAdminModal() { document.getElementById('adminModal').style.display = 'flex'; document.getElementById('adminModalPassword').value = ''; }
+        function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
         function unlockAdmin() {
-            const enteredPassword = document.getElementById('adminModalPassword').value;
-            if (enteredPassword === currentUser.adminPassword) {
-                isAdminMode = true;
-                updateAdminUI();
-                showAlert('Modalità Admin sbloccata! Ora puoi creare campionati e modificare i dati.', 'success');
-                closeAdminModal();
-                loadUserCampionati();
-                if (currentCampionatoId) updateEditButtons();
-            } else {
-                showAlert('Password amministratore errata!', 'error');
-            }
+            if (document.getElementById('adminModalPassword').value === currentUser.adminPassword) {
+                isAdminMode = true; updateAdminUI(); showAlert('Modalità Admin sbloccata!', 'success');
+                closeAdminModal(); loadUserCampionati(); if (currentCampionatoId) updateEditButtons();
+            } else { showAlert('Password amministratore errata!', 'error'); }
         }
-        
         function updateAdminUI() {
-            const adminStatusSpan = document.getElementById('adminStatus');
-            const createCampBtn = document.getElementById('createCampBtn');
+            const statusSpan = document.getElementById('adminStatus');
+            const createBtn = document.getElementById('createCampBtn');
             const roleBadge = document.getElementById('roleBadge');
-            
             if (isAdminMode) {
-                if (adminStatusSpan) {
-                    adminStatusSpan.innerHTML = '<i class="fas fa-unlock-alt"></i> Modalità Admin (Modifica)';
-                    adminStatusSpan.style.background = '#2ecc71';
-                }
-                if (createCampBtn) createCampBtn.style.display = 'inline-flex';
-                if (roleBadge) {
-                    roleBadge.innerHTML = '🔓 Admin';
-                    roleBadge.style.background = '#f39c12';
-                }
-                updateEditButtons();
+                if (statusSpan) statusSpan.innerHTML = '<i class="fas fa-unlock-alt"></i> Modalità Admin (Modifica)';
+                if (createBtn) createBtn.style.display = 'inline-flex';
+                if (roleBadge) { roleBadge.innerHTML = '🔓 Admin'; roleBadge.style.background = '#f39c12'; }
             } else {
-                if (adminStatusSpan) {
-                    adminStatusSpan.innerHTML = '<i class="fas fa-lock"></i> Solo Lettura';
-                    adminStatusSpan.style.background = 'rgba(0,0,0,0.5)';
-                }
-                if (createCampBtn) createCampBtn.style.display = 'none';
-                if (roleBadge) {
-                    roleBadge.innerHTML = '👁️ Solo Lettura';
-                    roleBadge.style.background = '#95a5a6';
-                }
-                updateEditButtons();
+                if (statusSpan) statusSpan.innerHTML = '<i class="fas fa-lock"></i> Solo Lettura';
+                if (createBtn) createBtn.style.display = 'none';
+                if (roleBadge) { roleBadge.innerHTML = '👁️ Solo Lettura'; roleBadge.style.background = '#95a5a6'; }
             }
+            updateEditButtons();
         }
-        
         function updateEditButtons() {
-            const editBtns = ['newMatchBtn', 'saveTeamBtn', 'addPlayerBtn', 'resetBtn', 'exportBtn', 'importBtn', 'changePasswordBtn'];
-            editBtns.forEach(id => { const btn = document.getElementById(id); if (btn) btn.disabled = !isAdminMode; });
-            const editInputs = ['playersPerTeamSetting', 'teamANameGlobal', 'teamBNameGlobal', 'teamALogo', 'teamBLogo', 'playerName', 'playerNumber', 'playerPhotoInput', 'isGoalkeeper', 'bgImageInput', 'newUserPassword', 'newAdminPassword'];
-            editInputs.forEach(id => { const el = document.getElementById(id); if (el) el.disabled = !isAdminMode; });
+            const btns = ['newMatchBtn', 'saveTeamBtn', 'addPlayerBtn', 'resetBtn', 'exportBtn', 'importBtn', 'changePasswordBtn'];
+            btns.forEach(id => { const btn = document.getElementById(id); if (btn) btn.disabled = !isAdminMode; });
+            const inputs = ['playersPerTeamSetting', 'teamANameGlobal', 'teamBNameGlobal', 'teamALogo', 'teamBLogo', 'playerName', 'playerNumber', 'playerPhotoInput', 'isGoalkeeper', 'bgImageInput', 'newUserPassword', 'newAdminPassword'];
+            inputs.forEach(id => { const el = document.getElementById(id); if (el) el.disabled = !isAdminMode; });
         }
         
         // ========== GESTIONE CAMPIONATI ==========
         async function loadUserCampionati() {
             if (!currentUser) return;
-            
             const campionati = currentUser.campionati || [];
             const container = document.getElementById('campionatiList');
-            
             if (!container) return;
-            
             if (campionati.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding: 40px;"><i class="fas fa-info-circle"></i> Nessun campionato. Clicca su "Crea Nuovo Campionato" per iniziare.</div>';
+                container.innerHTML = '<div style="text-align:center; padding:40px;"><i class="fas fa-info-circle"></i> Nessun campionato.</div>';
                 return;
             }
-            
             let stats = {};
             for (const c of campionati) {
-                const campData = await loadCampionatoDataFromFirestore(c.id);
-                stats[c.id] = {
-                    giocatori: campData?.players?.length || 0,
-                    partite: campData?.matches?.length || 0
-                };
+                const data = await loadCampionatoDataFromFirestore(c.id);
+                stats[c.id] = { giocatori: data?.players?.length || 0, partite: data?.matches?.length || 0 };
             }
-            
             container.innerHTML = campionati.map(c => `
                 <div class="campionato-card" onclick="selezionaCampionato('${c.id}', '${escapeHtml(c.nome)}')">
                     <h3><i class="fas fa-trophy"></i> ${escapeHtml(c.nome)}</h3>
@@ -671,117 +553,34 @@
             `).join('');
         }
         
-        async function loadCampionatoDataFromFirestore(campionatoId) {
-            if (!currentUser) return null;
-            
-            try {
-                const doc = await db.collection('users').doc(currentUser.firebaseUid)
-                    .collection('campionati').doc(campionatoId).get();
-                
-                if (doc.exists) {
-                    return doc.data();
-                }
-            } catch(e) {
-                console.log("Errore caricamento campionato:", e);
-            }
-            return null;
-        }
-        
-        async function saveCampionatoDataToFirestore() {
-            if (currentCampionatoId && currentUser && isAdminMode) {
-                await db.collection('users').doc(currentUser.firebaseUid)
-                    .collection('campionati').doc(currentCampionatoId).set({
-                        players, matches, playersPerTeam, teamSettings, seasonName,
-                        updatedAt: new Date().toISOString()
-                    });
-                await updateCampionatoStats();
-            }
-        }
-        
-        async function updateCampionatoStats() {
-            if (currentCampionatoId && currentUser) {
-                const userRef = db.collection('users').doc(currentUser.firebaseUid);
-                const userDoc = await userRef.get();
-                const userData = userDoc.data();
-                const campionati = userData.campionati || [];
-                const campIndex = campionati.findIndex(c => c.id === currentCampionatoId);
-                
-                if (campIndex !== -1) {
-                    campionati[campIndex].stats = {
-                        giocatori: players.length,
-                        partite: matches.length
-                    };
-                    await userRef.update({ campionati: campionati });
-                    currentUser.campionati = campionati;
-                }
-            }
-        }
-        
         function caricaUltimoCampionato() {
             const campionati = currentUser?.campionati || [];
-            if (campionati.length > 0) {
-                const ultimoId = localStorage.getItem(`ultimo_campionato_${currentUser.username}`);
-                let campionatoDaCaricare = null;
-                
-                if (ultimoId) {
-                    campionatoDaCaricare = campionati.find(c => c.id === ultimoId);
-                }
-                
-                if (!campionatoDaCaricare && campionati.length > 0) {
-                    campionatoDaCaricare = campionati[0];
-                }
-                
-                if (campionatoDaCaricare) {
-                    selezionaCampionato(campionatoDaCaricare.id, campionatoDaCaricare.nome);
-                }
-            }
+            if (campionati.length === 0) return;
+            const ultimoId = localStorage.getItem(`ultimo_campionato_${currentUser.username}`);
+            let daCaricare = campionati.find(c => c.id === ultimoId) || campionati[0];
+            if (daCaricare) selezionaCampionato(daCaricare.id, daCaricare.nome);
         }
         
-        function showCreateCampionatoModal() {
-            if (!isAdminMode) { showAlert('Devi sbloccare la modalità Admin!', 'error'); return; }
-            document.getElementById('createCampionatoModal').style.display = 'flex';
-            document.getElementById('newCampionatoNome').value = '';
-        }
-        
-        function closeCreateCampionatoModal() {
-            document.getElementById('createCampionatoModal').style.display = 'none';
-        }
+        function showCreateCampionatoModal() { if (!isAdminMode) { showAlert('Devi sbloccare la modalità Admin!', 'error'); return; } document.getElementById('createCampionatoModal').style.display = 'flex'; document.getElementById('newCampionatoNome').value = ''; }
+        function closeCreateCampionatoModal() { document.getElementById('createCampionatoModal').style.display = 'none'; }
         
         async function createCampionato() {
             if (!isAdminMode) return;
-            
             const nome = document.getElementById('newCampionatoNome').value.trim();
             if (!nome) { showAlert('Inserisci un nome', 'error'); return; }
-            
             const userRef = db.collection('users').doc(currentUser.firebaseUid);
             const userDoc = await userRef.get();
-            const userData = userDoc.data();
-            let campionati = userData.campionati || [];
-            
-            if (campionati.find(c => c.nome === nome)) {
-                showAlert('Nome già esistente!', 'error');
-                return;
-            }
-            
-            const nuovoCampionato = {
-                id: Date.now().toString(),
-                nome: nome,
-                dataCreazione: new Date().toISOString(),
-                stats: { giocatori: 0, partite: 0 }
-            };
-            
-            campionati.push(nuovoCampionato);
-            await userRef.update({ campionati: campionati });
+            let campionati = userDoc.data()?.campionati || [];
+            if (campionati.find(c => c.nome === nome)) { showAlert('Nome già esistente!', 'error'); return; }
+            const nuovo = { id: Date.now().toString(), nome, dataCreazione: new Date().toISOString(), stats: { giocatori: 0, partite: 0 } };
+            campionati.push(nuovo);
+            await userRef.update({ campionati });
             currentUser.campionati = campionati;
-            
-            await db.collection('users').doc(currentUser.firebaseUid)
-                .collection('campionati').doc(nuovoCampionato.id).set({
-                    players: [], matches: [], playersPerTeam: 5,
-                    teamSettings: { nameA: 'Squadra A', logoA: null, nameB: 'Squadra B', logoB: null },
-                    seasonName: "Stagione 2024/2025",
-                    createdAt: new Date().toISOString()
-                });
-            
+            await db.collection('users').doc(currentUser.firebaseUid).collection('campionati').doc(nuovo.id).set({
+                players: [], matches: [], playersPerTeam: 5,
+                teamSettings: { nameA: 'Squadra A', logoA: null, nameB: 'Squadra B', logoB: null },
+                seasonName: "Stagione 2024/2025", createdAt: new Date().toISOString()
+            });
             closeCreateCampionatoModal();
             await loadUserCampionati();
             showAlert(`Campionato "${nome}" creato!`, 'success');
@@ -789,41 +588,27 @@
         
         async function eliminaCampionato(campionatoId) {
             if (!isAdminMode) return;
-            if (confirm('Eliminare questo campionato? Tutti i dati saranno persi!')) {
-                const userRef = db.collection('users').doc(currentUser.firebaseUid);
-                const userDoc = await userRef.get();
-                const userData = userDoc.data();
-                let campionati = userData.campionati || [];
-                campionati = campionati.filter(c => c.id !== campionatoId);
-                await userRef.update({ campionati: campionati });
-                await db.collection('users').doc(currentUser.firebaseUid)
-                    .collection('campionati').doc(campionatoId).delete();
-                
-                currentUser.campionati = campionati;
-                localStorage.removeItem(`ultimo_campionato_${currentUser.username}`);
-                await loadUserCampionati();
-                showAlert('Campionato eliminato', 'success');
-            }
+            if (!confirm('Eliminare questo campionato? Tutti i dati saranno persi!')) return;
+            const userRef = db.collection('users').doc(currentUser.firebaseUid);
+            const userDoc = await userRef.get();
+            let campionati = userDoc.data()?.campionati || [];
+            campionati = campionati.filter(c => c.id !== campionatoId);
+            await userRef.update({ campionati });
+            await db.collection('users').doc(currentUser.firebaseUid).collection('campionati').doc(campionatoId).delete();
+            currentUser.campionati = campionati;
+            localStorage.removeItem(`ultimo_campionato_${currentUser.username}`);
+            await loadUserCampionati();
+            showAlert('Campionato eliminato', 'success');
         }
         
         async function selezionaCampionato(campionatoId, campionatoNome) {
             currentCampionatoId = campionatoId;
             currentCampionatoNome = campionatoNome;
-            
-            if (currentUser) {
-                localStorage.setItem(`ultimo_campionato_${currentUser.username}`, campionatoId);
-            }
-            
-            const currentCampionatoNameSpan = document.getElementById('currentCampionatoName');
-            if (currentCampionatoNameSpan) {
-                currentCampionatoNameSpan.textContent = campionatoNome;
-            }
-            
-            const campionatiView = document.getElementById('campionatiView');
-            const mainApp = document.getElementById('mainApp');
-            if (campionatiView) campionatiView.style.display = 'none';
-            if (mainApp) mainApp.style.display = 'block';
-            
+            if (currentUser) localStorage.setItem(`ultimo_campionato_${currentUser.username}`, campionatoId);
+            const nameSpan = document.getElementById('currentCampionatoName');
+            if (nameSpan) nameSpan.textContent = campionatoNome;
+            document.getElementById('campionatiView').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
             await loadCampionatoData();
             calculateAllStats();
             updateTeamUI();
@@ -833,10 +618,8 @@
         
         function tornaAiCampionati() {
             currentCampionatoId = null;
-            const mainApp = document.getElementById('mainApp');
-            const campionatiView = document.getElementById('campionatiView');
-            if (mainApp) mainApp.style.display = 'none';
-            if (campionatiView) campionatiView.style.display = 'block';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('campionatiView').style.display = 'block';
             loadUserCampionati();
         }
         
@@ -849,322 +632,113 @@
                 teamSettings = data.teamSettings || { nameA: 'Squadra A', logoA: null, nameB: 'Squadra B', logoB: null };
                 seasonName = data.seasonName || "Stagione 2024/2025";
             }
-            
-            const playersPerTeamInput = document.getElementById('playersPerTeamSetting');
-            if (playersPerTeamInput) {
-                playersPerTeamInput.value = playersPerTeam;
-            }
-            
-            const seasonNameSpan = document.getElementById('seasonName');
-            if (seasonNameSpan) {
-                seasonNameSpan.textContent = seasonName;
-            }
+            const input = document.getElementById('playersPerTeamSetting');
+            if (input) input.value = playersPerTeam;
+            const seasonSpan = document.getElementById('seasonName');
+            if (seasonSpan) seasonSpan.textContent = seasonName;
         }
         
-        function saveCampionatoData() {
-            saveCampionatoDataToFirestore();
-        }
-        
-        // ========== FUNZIONI UTILITY (invariate dall'originale) ==========
+        // ========== FUNZIONI ORIGINALI (INVARIATE) ==========
         function getSortedPlayers() { return [...players].sort((a, b) => a.name.localeCompare(b.name)); }
         
         function updateTeamUI() {
-            const teamANameGlobal = document.getElementById('teamANameGlobal');
-            const teamBNameGlobal = document.getElementById('teamBNameGlobal');
-            const teamANameForm = document.getElementById('teamANameForm');
-            const teamBNameForm = document.getElementById('teamBNameForm');
-            const teamANameGoalsA = document.getElementById('teamANameGoalsA');
-            const teamANameGoalsB = document.getElementById('teamANameGoalsB');
-            
-            if (teamANameGlobal) teamANameGlobal.value = teamSettings.nameA;
-            if (teamBNameGlobal) teamBNameGlobal.value = teamSettings.nameB;
-            if (teamANameForm) teamANameForm.textContent = teamSettings.nameA;
-            if (teamBNameForm) teamBNameForm.textContent = teamSettings.nameB;
-            if (teamANameGoalsA) teamANameGoalsA.textContent = teamSettings.nameA;
-            if (teamANameGoalsB) teamANameGoalsB.textContent = teamSettings.nameB;
-            
+            const aName = document.getElementById('teamANameGlobal'); if (aName) aName.value = teamSettings.nameA;
+            const bName = document.getElementById('teamBNameGlobal'); if (bName) bName.value = teamSettings.nameB;
+            const aForm = document.getElementById('teamANameForm'); if (aForm) aForm.textContent = teamSettings.nameA;
+            const bForm = document.getElementById('teamBNameForm'); if (bForm) bForm.textContent = teamSettings.nameB;
+            const aGoal = document.getElementById('teamANameGoalsA'); if (aGoal) aGoal.textContent = teamSettings.nameA;
+            const bGoal = document.getElementById('teamANameGoalsB'); if (bGoal) bGoal.textContent = teamSettings.nameB;
             const logoAPreview = document.getElementById('teamALogoPreview');
             const logoAForm = document.getElementById('teamALogoForm');
-            if (teamSettings.logoA) {
-                if (logoAPreview) {
-                    logoAPreview.src = teamSettings.logoA;
-                    logoAPreview.style.display = 'block';
-                }
-                if (logoAForm) {
-                    logoAForm.src = teamSettings.logoA;
-                    logoAForm.style.display = 'inline-block';
-                }
-            }
-            
             const logoBPreview = document.getElementById('teamBLogoPreview');
             const logoBForm = document.getElementById('teamBLogoForm');
+            if (teamSettings.logoA) {
+                if (logoAPreview) { logoAPreview.src = teamSettings.logoA; logoAPreview.style.display = 'block'; }
+                if (logoAForm) { logoAForm.src = teamSettings.logoA; logoAForm.style.display = 'inline-block'; }
+            }
             if (teamSettings.logoB) {
-                if (logoBPreview) {
-                    logoBPreview.src = teamSettings.logoB;
-                    logoBPreview.style.display = 'block';
-                }
-                if (logoBForm) {
-                    logoBForm.src = teamSettings.logoB;
-                    logoBForm.style.display = 'inline-block';
-                }
+                if (logoBPreview) { logoBPreview.src = teamSettings.logoB; logoBPreview.style.display = 'block'; }
+                if (logoBForm) { logoBForm.src = teamSettings.logoB; logoBForm.style.display = 'inline-block'; }
             }
         }
         
-        function previewTeamLogo(team, input) { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } const file = input.files[0]; if (file) { const reader = new FileReader(); reader.onload = function(e) { const preview = document.getElementById(`team${team}LogoPreview`); if (preview) { preview.src = e.target.result; preview.style.display = 'block'; } if (team === 'A') teamSettings.logoA = e.target.result; else teamSettings.logoB = e.target.result; saveCampionatoData(); updateTeamUI(); }; reader.readAsDataURL(file); } }
+        function previewTeamLogo(team, input) { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } const file = input.files[0]; if (file) { const reader = new FileReader(); reader.onload = e => { const preview = document.getElementById(`team${team}LogoPreview`); if (preview) preview.src = e.target.result; if (team === 'A') teamSettings.logoA = e.target.result; else teamSettings.logoB = e.target.result; saveCampionatoDataToFirestore(); updateTeamUI(); }; reader.readAsDataURL(file); } }
         
-        function saveTeamSettings() { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } teamSettings.nameA = document.getElementById('teamANameGlobal').value || 'Squadra A'; teamSettings.nameB = document.getElementById('teamBNameGlobal').value || 'Squadra B'; saveCampionatoData(); updateTeamUI(); updateMatchesList(); showAlert('Impostazioni salvate!', 'success'); }
+        function saveTeamSettings() { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } teamSettings.nameA = document.getElementById('teamANameGlobal').value || 'Squadra A'; teamSettings.nameB = document.getElementById('teamBNameGlobal').value || 'Squadra B'; saveCampionatoDataToFirestore(); updateTeamUI(); updateMatchesList(); showAlert('Impostazioni salvate!', 'success'); }
         
-        function updatePlayersPerTeam() { 
-            if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } 
-            let newValue = parseInt(document.getElementById('playersPerTeamSetting').value); 
-            if (newValue >= 1 && newValue <= 22) { 
-                playersPerTeam = newValue; 
-                saveCampionatoData(); 
-                if (document.getElementById('newMatchFormContainer').style.display === 'block') {
-                    updateMatchSelectors();
-                }
-                showAlert('Impostazione salvata!', 'success'); 
-            } else { 
-                showAlert('Il numero deve essere compreso tra 1 e 22!', 'error'); 
-                document.getElementById('playersPerTeamSetting').value = playersPerTeam; 
-            } 
-        }
+        function updatePlayersPerTeam() { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } let newVal = parseInt(document.getElementById('playersPerTeamSetting').value); if (newVal >= 1 && newVal <= 22) { playersPerTeam = newVal; saveCampionatoDataToFirestore(); if (document.getElementById('newMatchFormContainer').style.display === 'block') updateMatchSelectors(); showAlert('Impostazione salvata!', 'success'); } else { showAlert('Il numero deve essere compreso tra 1 e 22!', 'error'); document.getElementById('playersPerTeamSetting').value = playersPerTeam; } }
         
         function openSeasonModal() { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } document.getElementById('seasonNameInput').value = seasonName; document.getElementById('seasonModal').style.display = 'flex'; }
         function closeSeasonModal() { document.getElementById('seasonModal').style.display = 'none'; }
-        function saveSeasonName() { 
-            if (!isAdminMode) { 
-                showAlert('Sblocca la modalità Admin!', 'error'); 
-                return; 
-            } 
-            const newName = document.getElementById('seasonNameInput').value.trim(); 
-            if (newName) { 
-                seasonName = newName; 
-                const seasonNameSpan = document.getElementById('seasonName'); 
-                if (seasonNameSpan) seasonNameSpan.textContent = seasonName; 
-                saveCampionatoData(); 
-                showAlert('Nome stagione aggiornato!', 'success'); 
-                closeSeasonModal(); 
-            } 
-        }
+        function saveSeasonName() { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } const newName = document.getElementById('seasonNameInput').value.trim(); if (newName) { seasonName = newName; const span = document.getElementById('seasonName'); if (span) span.textContent = seasonName; saveCampionatoDataToFirestore(); showAlert('Nome stagione aggiornato!', 'success'); closeSeasonModal(); } }
         
-        function openCropModal(input) { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } const file = input.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { document.getElementById('cropImage').src = e.target.result; document.getElementById('cropModal').style.display = 'flex'; if (cropper) cropper.destroy(); cropper = new Cropper(document.getElementById('cropImage'), { aspectRatio: 1, viewMode: 1, autoCropArea: 0.9 }); }; reader.readAsDataURL(file); }
-        function cropAndSave() { if (cropper) { const canvas = cropper.getCroppedCanvas({ width: 150, height: 150 }); pendingPhoto = canvas.toDataURL('image/jpeg', 0.9); const preview = document.getElementById('playerPhotoPreview'); if (preview) { preview.src = pendingPhoto; preview.style.display = 'block'; } closeCropModal(); } }
+        function openCropModal(input) { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } const file = input.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = e => { document.getElementById('cropImage').src = e.target.result; document.getElementById('cropModal').style.display = 'flex'; if (cropper) cropper.destroy(); cropper = new Cropper(document.getElementById('cropImage'), { aspectRatio: 1, viewMode: 1, autoCropArea: 0.9 }); }; reader.readAsDataURL(file); }
+        function cropAndSave() { if (cropper) { const canvas = cropper.getCroppedCanvas({ width: 150, height: 150 }); pendingPhoto = canvas.toDataURL('image/jpeg', 0.9); const preview = document.getElementById('playerPhotoPreview'); if (preview) preview.src = pendingPhoto; closeCropModal(); } }
         function closeCropModal() { document.getElementById('cropModal').style.display = 'none'; if (cropper) { cropper.destroy(); cropper = null; } }
         
-        function addPlayer(name, isGoalkeeper, photo, number) { 
-            if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return false; } 
-            if (!name.trim()) return false; 
-            if (players.some(p => p.name.toLowerCase() === name.toLowerCase())) { 
-                showAlert('Giocatore già esistente!', 'error'); 
-                return false; 
-            } 
-            players.push({ 
-                id: Date.now(), name: name.trim(), number: number || Math.floor(Math.random() * 99) + 1, isGoalkeeper, photo, 
-                goalsScored: 0, assists: 0, ownGoals: 0, goalsConceded: 0, matchesPlayed: 0, matchesAsGoalkeeper: 0,
-                wins: 0, draws: 0, losses: 0, mvpAwards: 0, bestGoalkeeperAwards: 0, cleanSheets: 0 
-            }); 
-            saveCampionatoData(); 
-            calculateAllStats(); 
-            updatePlayersList();
-            if (document.getElementById('newMatchFormContainer').style.display === 'block') {
-                updateMatchSelectors();
-            }
-            return true; 
-        }
+        function addPlayer(name, isGoalkeeper, photo, number) { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return false; } if (!name.trim()) return false; if (players.some(p => p.name.toLowerCase() === name.toLowerCase())) { showAlert('Giocatore già esistente!', 'error'); return false; } players.push({ id: Date.now(), name: name.trim(), number: number || Math.floor(Math.random()*99)+1, isGoalkeeper, photo, goalsScored:0, assists:0, ownGoals:0, goalsConceded:0, matchesPlayed:0, matchesAsGoalkeeper:0, wins:0, draws:0, losses:0, mvpAwards:0, bestGoalkeeperAwards:0, cleanSheets:0 }); saveCampionatoDataToFirestore(); calculateAllStats(); updatePlayersList(); if (document.getElementById('newMatchFormContainer').style.display === 'block') updateMatchSelectors(); return true; }
         
-        function removePlayer(playerId) { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } if (confirm('Rimuovere questo giocatore?')) { players = players.filter(p => p.id != playerId); saveCampionatoData(); calculateAllStats(); updateAll(); if (document.getElementById('newMatchFormContainer').style.display === 'block') { updateMatchSelectors(); } } }
+        function removePlayer(playerId) { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } if (confirm('Rimuovere questo giocatore?')) { players = players.filter(p => p.id != playerId); saveCampionatoDataToFirestore(); calculateAllStats(); updateAll(); if (document.getElementById('newMatchFormContainer').style.display === 'block') updateMatchSelectors(); } }
         
-        function updatePlayersList() {
-            const container = document.getElementById('playersList');
-            if (!container) return;
-            const sorted = getSortedPlayers();
-            if (sorted.length === 0) { container.innerHTML = '<p style="text-align:center;padding:20px;">Nessun giocatore</p>'; return; }
-            container.innerHTML = sorted.map(p => `<div class="player-card">${p.photo ? `<img class="player-avatar" src="${p.photo}">` : `<div class="player-avatar" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2ecc71,#27ae60);color:white;font-size:24px;"><i class="fas fa-user"></i></div>`}<div class="player-info"><h3><strong>${escapeHtml(p.name)}</strong> <span class="badge"><i class="fas fa-hashtag"></i> ${p.number}</span> ${p.isGoalkeeper ? '<span class="badge"><i class="fas fa-glove"></i> Portiere</span>' : '<span class="badge"><i class="fas fa-futbol"></i> Calciatore</span>'}</h3><div class="player-stats"><span><i class="fas fa-futbol"></i> ${p.goalsScored}</span><span><i class="fas fa-handshake"></i> ${p.assists}</span><span><i class="fas fa-skull"></i> ${p.ownGoals}</span><span><i class="fas fa-trophy"></i> ${p.wins}</span><span><i class="fas fa-star"></i> ${p.mvpAwards}</span><span><i class="fas fa-glove"></i> ${p.bestGoalkeeperAwards}</span><span><i class="fas fa-shield-alt"></i> ${p.cleanSheets}</span><span><i class="fas fa-calendar"></i> ${p.matchesPlayed} partite</span></div></div><button class="delete-btn" onclick="removePlayer(${p.id})" ${!isAdminMode ? 'disabled' : ''}><i class="fas fa-trash-alt"></i></button></div>`).join('');
-        }
+        function updatePlayersList() { const container = document.getElementById('playersList'); if (!container) return; const sorted = getSortedPlayers(); if (sorted.length === 0) { container.innerHTML = '<p style="text-align:center;padding:20px;">Nessun giocatore</p>'; return; } container.innerHTML = sorted.map(p => `<div class="player-card">${p.photo ? `<img class="player-avatar" src="${p.photo}">` : `<div class="player-avatar" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2ecc71,#27ae60);color:white;font-size:24px;"><i class="fas fa-user"></i></div>`}<div class="player-info"><h3><strong>${escapeHtml(p.name)}</strong> <span class="badge"><i class="fas fa-hashtag"></i> ${p.number}</span> ${p.isGoalkeeper ? '<span class="badge"><i class="fas fa-glove"></i> Portiere</span>' : '<span class="badge"><i class="fas fa-futbol"></i> Calciatore</span>'}</h3><div class="player-stats"><span><i class="fas fa-futbol"></i> ${p.goalsScored}</span><span><i class="fas fa-handshake"></i> ${p.assists}</span><span><i class="fas fa-skull"></i> ${p.ownGoals}</span><span><i class="fas fa-trophy"></i> ${p.wins}</span><span><i class="fas fa-star"></i> ${p.mvpAwards}</span><span><i class="fas fa-glove"></i> ${p.bestGoalkeeperAwards}</span><span><i class="fas fa-shield-alt"></i> ${p.cleanSheets}</span><span><i class="fas fa-calendar"></i> ${p.matchesPlayed} partite</span></div></div><button class="delete-btn" onclick="removePlayer(${p.id})" ${!isAdminMode ? 'disabled' : ''}><i class="fas fa-trash-alt"></i></button></div>`).join(''); }
         
-        function getTeamPlayersList(teamIds) {
-            if (!teamIds || teamIds.length === 0) return '';
-            let html = '<div class="team-players-list">';
-            for (let i = 0; i < teamIds.length; i++) {
-                const player = players.find(p => p.id === teamIds[i]);
-                if (player) {
-                    html += `<span class="player-tag"><i class="fas fa-user"></i> ${escapeHtml(player.name)}${player.isGoalkeeper ? ' 🧤' : ''}</span>`;
-                }
-            }
-            html += '</div>';
-            return html;
-        }
+        function getTeamPlayersList(teamIds) { if (!teamIds || teamIds.length === 0) return ''; let html = '<div class="team-players-list">'; for (let id of teamIds) { const p = players.find(p => p.id === id); if (p) html += `<span class="player-tag"><i class="fas fa-user"></i> ${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</span>`; } html += '</div>'; return html; }
         
-        function formatGoalsList(goals, teamName) {
-            if (!goals || goals.length === 0) return '<span style="color:#999;">Nessun goal</span>';
-            const goalCounts = {};
-            for (let i = 0; i < goals.length; i++) {
-                const g = goals[i];
-                const player = players.find(p => p.id === g.playerId);
-                if (player) {
-                    const key = `${player.id}_${g.isOwnGoal}`;
-                    if (!goalCounts[key]) {
-                        goalCounts[key] = { name: player.name, count: 0, isOwnGoal: g.isOwnGoal };
-                    }
-                    goalCounts[key].count++;
-                }
-            }
-            const items = Object.values(goalCounts);
-            let html = '<div class="match-goals-list">';
-            for (let i = 0; i < items.length; i++) {
-                const g = items[i];
-                if (g.isOwnGoal) {
-                    html += `<span class="own-goal-badge"><i class="fas fa-futbol"></i> ${escapeHtml(g.name)}: ${g.count} <span style="background:#c0392b; color:white; padding:2px 6px; border-radius:12px; font-size:0.7rem;">AUTOGOL</span></span>`;
-                } else {
-                    html += `<span class="goal-badge"><i class="fas fa-futbol"></i> ${escapeHtml(g.name)}: ${g.count}</span>`;
-                }
-            }
-            html += '</div>';
-            return html;
-        }
+        function formatGoalsList(goals) { if (!goals || goals.length === 0) return '<span style="color:#999;">Nessun goal</span>'; const counts = {}; for (let g of goals) { const p = players.find(p => p.id === g.playerId); if (p) { const key = `${p.id}_${g.isOwnGoal}`; if (!counts[key]) counts[key] = { name: p.name, count: 0, isOwnGoal: g.isOwnGoal }; counts[key].count++; } } let html = '<div class="match-goals-list">'; for (let g of Object.values(counts)) { if (g.isOwnGoal) html += `<span class="own-goal-badge"><i class="fas fa-futbol"></i> ${escapeHtml(g.name)}: ${g.count} <span style="background:#c0392b;padding:2px 6px;border-radius:12px;">AUTOGOL</span></span>`; else html += `<span class="goal-badge"><i class="fas fa-futbol"></i> ${escapeHtml(g.name)}: ${g.count}</span>`; } html += '</div>'; return html; }
         
-        function updateMatchesList() {
-            const container = document.getElementById('matchesList');
-            if (!container) return;
-            if (matches.length === 0) { 
-                container.innerHTML = '<p style="text-align:center;padding:20px;">Nessuna partita registrata.</p>'; 
-                return; 
-            }
-            
-            let html = '';
-            for (let i = matches.length - 1; i >= 0; i--) {
-                const m = matches[i];
-                const mvpPlayer = players.find(p => p.id === m.mvp);
-                const bestGk = players.find(p => p.id === m.bestGoalkeeper);
-                const goalsAList = formatGoalsList(m.goalsDetailA, m.teamAName);
-                const goalsBList = formatGoalsList(m.goalsDetailB, m.teamBName);
-                const teamAPlayersList = getTeamPlayersList(m.teamA);
-                const teamBPlayersList = getTeamPlayersList(m.teamB);
-                
-                html += `<div class="match-card">
-                    <div class="match-header">
-                        <div class="match-teams">
-                            <img src="${teamSettings.logoA || ''}" style="width:30px;height:30px;border-radius:10px;${!teamSettings.logoA ? 'display:none;' : ''}"> 
-                            <span>${escapeHtml(m.teamAName)}</span>
-                            <span style="font-size:1em;">vs</span>
-                            <img src="${teamSettings.logoB || ''}" style="width:30px;height:30px;border-radius:10px;${!teamSettings.logoB ? 'display:none;' : ''}">
-                            <span>${escapeHtml(m.teamBName)}</span>
-                        </div>
-                        <div class="match-score">${m.goalsA} - ${m.goalsB}</div>
-                        <div class="match-actions">
-                            <button class="edit-btn" onclick="editMatch(${m.id})" ${!isAdminMode ? 'disabled' : ''}><i class="fas fa-edit"></i></button>
-                            <button class="delete-match-btn" onclick="deleteMatch(${m.id})" ${!isAdminMode ? 'disabled' : ''}><i class="fas fa-trash-alt"></i></button>
-                        </div>
-                    </div>
-                    <div class="match-detail-box">
-                        <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px;">
-                            <div><i class="fas fa-calendar"></i> <strong>Data:</strong> ${formatDate(m.date)}</div>
-                            <div><i class="fas fa-star" style="color:#f39c12;"></i> <strong>MVP:</strong> ${mvpPlayer ? escapeHtml(mvpPlayer.name) : '<span style="color:#999;">Non selezionato</span>'}</div>
-                            <div><i class="fas fa-glove"></i> <strong>Miglior Portiere:</strong> ${bestGk ? escapeHtml(bestGk.name) : '<span style="color:#999;">Non selezionato</span>'}</div>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                            <div>
-                                <div style="background:#2ecc71; color:white; padding:8px; border-radius:10px; text-align:center; margin-bottom:10px;">
-                                    <strong><i class="fas fa-futbol"></i> ${escapeHtml(m.teamAName)} (${m.goalsA})</strong>
-                                </div>
-                                <div style="margin-bottom: 10px;">
-                                    <strong><i class="fas fa-users"></i> Formazione:</strong>
-                                    ${teamAPlayersList}
-                                </div>
-                                <div>
-                                    <strong><i class="fas fa-futbol"></i> Goal:</strong>
-                                    ${goalsAList}
-                                </div>
-                            </div>
-                            <div>
-                                <div style="background:#2ecc71; color:white; padding:8px; border-radius:10px; text-align:center; margin-bottom:10px;">
-                                    <strong><i class="fas fa-futbol"></i> ${escapeHtml(m.teamBName)} (${m.goalsB})</strong>
-                                </div>
-                                <div style="margin-bottom: 10px;">
-                                    <strong><i class="fas fa-users"></i> Formazione:</strong>
-                                    ${teamBPlayersList}
-                                </div>
-                                <div>
-                                    <strong><i class="fas fa-futbol"></i> Goal:</strong>
-                                    ${goalsBList}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-            }
-            container.innerHTML = html;
-        }
+        function updateMatchesList() { const container = document.getElementById('matchesList'); if (!container) return; if (matches.length === 0) { container.innerHTML = '<p style="text-align:center;padding:20px;">Nessuna partita registrata.</p>'; return; } let html = ''; for (let i = matches.length-1; i >= 0; i--) { const m = matches[i]; const mvpP = players.find(p => p.id === m.mvp); const bestGk = players.find(p => p.id === m.bestGoalkeeper); html += `<div class="match-card"><div class="match-header"><div class="match-teams"><img src="${teamSettings.logoA||''}" style="width:30px;height:30px;border-radius:10px;${!teamSettings.logoA?'display:none;':''}"><span>${escapeHtml(m.teamAName)}</span><span style="font-size:1em;">vs</span><img src="${teamSettings.logoB||''}" style="width:30px;height:30px;border-radius:10px;${!teamSettings.logoB?'display:none;':''}"><span>${escapeHtml(m.teamBName)}</span></div><div class="match-score">${m.goalsA} - ${m.goalsB}</div><div class="match-actions"><button class="edit-btn" onclick="editMatch(${m.id})" ${!isAdminMode?'disabled':''}><i class="fas fa-edit"></i></button><button class="delete-match-btn" onclick="deleteMatch(${m.id})" ${!isAdminMode?'disabled':''}><i class="fas fa-trash-alt"></i></button></div></div><div class="match-detail-box"><div style="display:flex;flex-wrap:wrap;gap:15px;margin-bottom:15px;"><div><i class="fas fa-calendar"></i> <strong>Data:</strong> ${formatDate(m.date)}</div><div><i class="fas fa-star" style="color:#f39c12;"></i> <strong>MVP:</strong> ${mvpP ? escapeHtml(mvpP.name) : '<span style="color:#999;">Non selezionato</span>'}</div><div><i class="fas fa-glove"></i> <strong>Miglior Portiere:</strong> ${bestGk ? escapeHtml(bestGk.name) : '<span style="color:#999;">Non selezionato</span>'}</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;"><div><div style="background:#2ecc71;color:white;padding:8px;border-radius:10px;text-align:center;margin-bottom:10px;"><strong><i class="fas fa-futbol"></i> ${escapeHtml(m.teamAName)} (${m.goalsA})</strong></div><div><strong><i class="fas fa-users"></i> Formazione:</strong> ${getTeamPlayersList(m.teamA)}</div><div><strong><i class="fas fa-futbol"></i> Goal:</strong> ${formatGoalsList(m.goalsDetailA)}</div></div><div><div style="background:#2ecc71;color:white;padding:8px;border-radius:10px;text-align:center;margin-bottom:10px;"><strong><i class="fas fa-futbol"></i> ${escapeHtml(m.teamBName)} (${m.goalsB})</strong></div><div><strong><i class="fas fa-users"></i> Formazione:</strong> ${getTeamPlayersList(m.teamB)}</div><div><strong><i class="fas fa-futbol"></i> Goal:</strong> ${formatGoalsList(m.goalsDetailB)}</div></div></div></div></div>`; } container.innerHTML = html; }
         
         function updateAll() { updatePlayersList(); updateMatchesList(); updateAllRankings(); }
         
-        function resetAllData() { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } if(confirm('Cancellare tutti i dati del campionato?')){ players=[]; matches=[]; saveCampionatoData(); calculateAllStats(); updateAll(); showAlert('Dati cancellati!','success'); } }
+        function resetAllData() { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } if(confirm('Cancellare tutti i dati del campionato?')){ players=[]; matches=[]; saveCampionatoDataToFirestore(); calculateAllStats(); updateAll(); showAlert('Dati cancellati!','success'); } }
         function exportData() { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify({players,matches,playersPerTeam,teamSettings,seasonName})])); a.download=`calcetto_${currentCampionatoNome || 'campionato'}.json`; a.click(); }
         function importData() { document.getElementById('importFile').click(); }
-        function handleImport(e) { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=ev=>{ try{ const data=JSON.parse(ev.target.result); if(data.players) players=data.players; if(data.matches) matches=data.matches; if(data.playersPerTeam) playersPerTeam=data.playersPerTeam; if(data.teamSettings) teamSettings=data.teamSettings; if(data.seasonName) seasonName=data.seasonName; const seasonNameSpan = document.getElementById('seasonName'); if (seasonNameSpan) seasonNameSpan.textContent = seasonName; document.getElementById('playersPerTeamSetting').value = playersPerTeam; saveCampionatoData(); calculateAllStats(); updateAll(); showAlert('Importato!','success'); }catch(e){ showAlert('Errore!','error'); } }; reader.readAsText(file); }
+        function handleImport(e) { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=ev=>{ try{ const data=JSON.parse(ev.target.result); if(data.players) players=data.players; if(data.matches) matches=data.matches; if(data.playersPerTeam) playersPerTeam=data.playersPerTeam; if(data.teamSettings) teamSettings=data.teamSettings; if(data.seasonName) seasonName=data.seasonName; const seasonSpan=document.getElementById('seasonName'); if(seasonSpan) seasonSpan.textContent=seasonName; document.getElementById('playersPerTeamSetting').value=playersPerTeam; saveCampionatoDataToFirestore(); calculateAllStats(); updateAll(); showAlert('Importato!','success'); }catch(e){ showAlert('Errore!','error'); } }; reader.readAsText(file); }
         
-        function changeBackground(input) { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } const file = input.files[0]; if (file) { const reader = new FileReader(); reader.onload = function(e) { localStorage.setItem('customBackground', e.target.result); applyBackground(e.target.result); const preview = document.getElementById('bgPreview'); if (preview) preview.style.backgroundImage = `url(${e.target.result})`; showAlert('Sfondo cambiato!', 'success'); }; reader.readAsDataURL(file); } }
-        function applyBackground(imageUrl) { document.body.classList.remove('default-bg'); document.body.classList.add('custom-bg'); document.body.style.backgroundImage = `url(${imageUrl})`; }
+        function changeBackground(input) { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } const file = input.files[0]; if (file) { const reader = new FileReader(); reader.onload = e => { localStorage.setItem('customBackground', e.target.result); applyBackground(e.target.result); const preview = document.getElementById('bgPreview'); if (preview) preview.style.backgroundImage = `url(${e.target.result})`; showAlert('Sfondo cambiato!', 'success'); }; reader.readAsDataURL(file); } }
+        function applyBackground(img) { document.body.classList.remove('default-bg'); document.body.classList.add('custom-bg'); document.body.style.backgroundImage = `url(${img})`; }
         function resetBackground() { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } localStorage.removeItem('customBackground'); document.body.classList.remove('custom-bg'); document.body.classList.add('default-bg'); document.body.style.backgroundImage = ''; const preview = document.getElementById('bgPreview'); if (preview) preview.style.backgroundImage = ''; showAlert('Sfondo ripristinato!', 'success'); }
-        function loadBackground() { const savedBg = localStorage.getItem('customBackground'); if (savedBg) { applyBackground(savedBg); const preview = document.getElementById('bgPreview'); if (preview) preview.style.backgroundImage = `url(${savedBg})`; } else document.body.classList.add('default-bg'); }
+        function loadBackground() { const saved = localStorage.getItem('customBackground'); if (saved) { applyBackground(saved); const preview = document.getElementById('bgPreview'); if (preview) preview.style.backgroundImage = `url(${saved})`; } else document.body.classList.add('default-bg'); }
         
-        function showAlertModal(message) { const alertModal = document.getElementById('alertModal'); const alertMessage = document.getElementById('alertMessage'); if (alertModal && alertMessage) { alertMessage.innerHTML = message.replace(/\n/g, '<br>'); alertModal.style.display = 'flex'; } }
-        function closeAlertModal() { const alertModal = document.getElementById('alertModal'); if (alertModal) alertModal.style.display = 'none'; }
+        function showAlertModal(msg) { const modal = document.getElementById('alertModal'); const msgDiv = document.getElementById('alertMessage'); if (modal && msgDiv) { msgDiv.innerHTML = msg.replace(/\n/g,'<br>'); modal.style.display = 'flex'; } }
+        function closeAlertModal() { const modal = document.getElementById('alertModal'); if (modal) modal.style.display = 'none'; }
         
-        // Event listener per alertConfirmBtn
         const alertConfirmBtn = document.getElementById('alertConfirmBtn');
-        if (alertConfirmBtn) {
-            const newAlertConfirmBtn = alertConfirmBtn.cloneNode(true);
-            alertConfirmBtn.parentNode.replaceChild(newAlertConfirmBtn, alertConfirmBtn);
-            newAlertConfirmBtn.addEventListener('click', closeAlertModal);
-        }
+        if (alertConfirmBtn) { const newBtn = alertConfirmBtn.cloneNode(true); alertConfirmBtn.parentNode.replaceChild(newBtn, alertConfirmBtn); newBtn.addEventListener('click', closeAlertModal); }
         
         let pendingConfirmCallback = null;
-        function showConfirmDialog(message, onConfirm, onCancel) { const confirmDialog = document.getElementById('confirmDialog'); const confirmMessage = document.getElementById('confirmMessage'); if (confirmDialog && confirmMessage) { confirmMessage.innerHTML = message.replace(/\n/g, '<br>'); confirmDialog.style.display = 'flex'; pendingConfirmCallback = { onConfirm, onCancel }; } }
-        function closeConfirmDialog() { const confirmDialog = document.getElementById('confirmDialog'); if (confirmDialog) confirmDialog.style.display = 'none'; pendingConfirmCallback = null; }
+        function showConfirmDialog(msg, onConfirm, onCancel) { const modal = document.getElementById('confirmDialog'); const msgDiv = document.getElementById('confirmMessage'); if (modal && msgDiv) { msgDiv.innerHTML = msg.replace(/\n/g,'<br>'); modal.style.display = 'flex'; pendingConfirmCallback = { onConfirm, onCancel }; } }
+        function closeConfirmDialog() { const modal = document.getElementById('confirmDialog'); if (modal) modal.style.display = 'none'; pendingConfirmCallback = null; }
         
         const confirmYesBtn = document.getElementById('confirmYesBtn');
-        if (confirmYesBtn) {
-            const newConfirmYesBtn = confirmYesBtn.cloneNode(true);
-            confirmYesBtn.parentNode.replaceChild(newConfirmYesBtn, confirmYesBtn);
-            newConfirmYesBtn.addEventListener('click', () => { if (pendingConfirmCallback && pendingConfirmCallback.onConfirm) pendingConfirmCallback.onConfirm(); closeConfirmDialog(); });
-        }
+        if (confirmYesBtn) { const newBtn = confirmYesBtn.cloneNode(true); confirmYesBtn.parentNode.replaceChild(newBtn, confirmYesBtn); newBtn.addEventListener('click', () => { if (pendingConfirmCallback?.onConfirm) pendingConfirmCallback.onConfirm(); closeConfirmDialog(); }); }
         
         const confirmNoBtn = document.getElementById('confirmNoBtn');
-        if (confirmNoBtn) {
-            const newConfirmNoBtn = confirmNoBtn.cloneNode(true);
-            confirmNoBtn.parentNode.replaceChild(newConfirmNoBtn, confirmNoBtn);
-            newConfirmNoBtn.addEventListener('click', () => { if (pendingConfirmCallback && pendingConfirmCallback.onCancel) pendingConfirmCallback.onCancel(); closeConfirmDialog(); });
-        }
+        if (confirmNoBtn) { const newBtn = confirmNoBtn.cloneNode(true); confirmNoBtn.parentNode.replaceChild(newBtn, confirmNoBtn); newBtn.addEventListener('click', () => { if (pendingConfirmCallback?.onCancel) pendingConfirmCallback.onCancel(); closeConfirmDialog(); }); }
         
-        function showSummaryModal(title, content, onConfirm) { const summaryModal = document.getElementById('summaryModal'); const summaryContent = document.getElementById('summaryContent'); if (summaryModal && summaryContent) { summaryContent.innerHTML = `<h3 style="margin-bottom:15px;">${title}</h3>${content}`; summaryModal.style.display = 'flex'; pendingSaveCallback = onConfirm; } }
-        function closeSummaryModal() { const summaryModal = document.getElementById('summaryModal'); if (summaryModal) summaryModal.style.display = 'none'; pendingSaveCallback = null; }
+        function showSummaryModal(title, content, onConfirm) { const modal = document.getElementById('summaryModal'); const contentDiv = document.getElementById('summaryContent'); if (modal && contentDiv) { contentDiv.innerHTML = `<h3 style="margin-bottom:15px;">${title}</h3>${content}`; modal.style.display = 'flex'; pendingSaveCallback = onConfirm; } }
+        function closeSummaryModal() { const modal = document.getElementById('summaryModal'); if (modal) modal.style.display = 'none'; pendingSaveCallback = null; }
         function confirmSave() { if (pendingSaveCallback) { pendingSaveCallback(); closeSummaryModal(); } }
         
         const confirmSaveBtn = document.getElementById('confirmSaveBtn');
-        if (confirmSaveBtn) {
-            const newConfirmSaveBtn = confirmSaveBtn.cloneNode(true);
-            confirmSaveBtn.parentNode.replaceChild(newConfirmSaveBtn, confirmSaveBtn);
-            newConfirmSaveBtn.addEventListener('click', confirmSave);
-        }
+        if (confirmSaveBtn) { const newBtn = confirmSaveBtn.cloneNode(true); confirmSaveBtn.parentNode.replaceChild(newBtn, confirmSaveBtn); newBtn.addEventListener('click', confirmSave); }
         
         // FUNZIONI PARTITA
-        function updateGoalCountersNew() { let goalsACount = goalsData.A.filter(g => g.playerId).length; let goalsBCount = goalsData.B.filter(g => g.playerId).length; const goalsACountSpan = document.getElementById('goalsACountNew'); const goalsBCountSpan = document.getElementById('goalsBCountNew'); if (goalsACountSpan) goalsACountSpan.innerHTML = `${goalsACount} goal`; if (goalsBCountSpan) goalsBCountSpan.innerHTML = `${goalsBCount} goal`; }
-        function showNewMatchForm() { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } const formContainer = document.getElementById('newMatchFormContainer'); if (formContainer) formContainer.style.display = 'block'; updateMatchSelectors(); goalsData = { A: [], B: [] }; renderGoalsContainer('A'); renderGoalsContainer('B'); updateGoalCountersNew(); const matchDateInput = document.getElementById('matchDate'); if (matchDateInput) matchDateInput.value = new Date().toISOString().split('T')[0]; updateMvpAndGkSelectors(); }
-        function hideNewMatchForm() { const formContainer = document.getElementById('newMatchFormContainer'); if (formContainer) formContainer.style.display = 'none'; }
-        function updateMvpAndGkSelectors() { const teamAPlayers = getCurrentTeamPlayers('A'); const teamBPlayers = getCurrentTeamPlayers('B'); const allMatchPlayers = [...teamAPlayers, ...teamBPlayers]; const fieldPlayers = allMatchPlayers.filter(p => !p.isGoalkeeper); const mvpSelect = document.getElementById('mvp'); if (mvpSelect) { mvpSelect.innerHTML = '<option value="">Seleziona MVP</option>' + fieldPlayers.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join(''); } const goalkeepers = allMatchPlayers.filter(p => p.isGoalkeeper); const gkSelect = document.getElementById('bestGoalkeeper'); if (gkSelect) { if (goalkeepers.length === 0) gkSelect.innerHTML = '<option value="">Seleziona Miglior Portiere</option><option value="" disabled>⚠️ Nessun portiere in campo</option>'; else gkSelect.innerHTML = '<option value="">Seleziona Miglior Portiere</option>' + goalkeepers.map(p => `<option value="${p.id}">${escapeHtml(p.name)} 🧤</option>`).join(''); } }
+        function updateGoalCountersNew() { const aCount = goalsData.A.filter(g => g.playerId).length; const bCount = goalsData.B.filter(g => g.playerId).length; const aSpan = document.getElementById('goalsACountNew'); const bSpan = document.getElementById('goalsBCountNew'); if (aSpan) aSpan.innerHTML = `${aCount} goal`; if (bSpan) bSpan.innerHTML = `${bCount} goal`; }
+        function showNewMatchForm() { if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } const container = document.getElementById('newMatchFormContainer'); if (container) container.style.display = 'block'; updateMatchSelectors(); goalsData = { A: [], B: [] }; renderGoalsContainer('A'); renderGoalsContainer('B'); updateGoalCountersNew(); const dateInput = document.getElementById('matchDate'); if (dateInput) dateInput.value = new Date().toISOString().split('T')[0]; updateMvpAndGkSelectors(); }
+        function hideNewMatchForm() { const container = document.getElementById('newMatchFormContainer'); if (container) container.style.display = 'none'; }
+        function updateMvpAndGkSelectors() { const teamA = getCurrentTeamPlayers('A'); const teamB = getCurrentTeamPlayers('B'); const all = [...teamA, ...teamB]; const field = all.filter(p => !p.isGoalkeeper); const mvpSel = document.getElementById('mvp'); if (mvpSel) mvpSel.innerHTML = '<option value="">Seleziona MVP</option>' + field.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join(''); const gk = all.filter(p => p.isGoalkeeper); const gkSel = document.getElementById('bestGoalkeeper'); if (gkSel) { if (gk.length === 0) gkSel.innerHTML = '<option value="">Seleziona Miglior Portiere</option><option disabled>⚠️ Nessun portiere</option>'; else gkSel.innerHTML = '<option value="">Seleziona Miglior Portiere</option>' + gk.map(p => `<option value="${p.id}">${escapeHtml(p.name)} 🧤</option>`).join(''); } }
         function addGoalPlayer(team) { const teamPlayers = getCurrentTeamPlayers(team); if (teamPlayers.length === 0) { showAlert('Seleziona prima i giocatori della squadra!', 'error'); return; } goalsData[team].push({ playerId: null, isOwnGoal: false, assistId: null }); renderGoalsContainer(team); updateGoalCountersNew(); }
-        function removeGoalPlayer(team, index) { goalsData[team].splice(index, 1); renderGoalsContainer(team); updateGoalCountersNew(); }
-        function updateGoalPlayerType(team, index, value) { goalsData[team][index].isOwnGoal = value === 'true'; goalsData[team][index].assistId = null; goalsData[team][index].playerId = null; renderGoalsContainer(team); updateGoalCountersNew(); }
-        function updateGoalPlayerPlayer(team, index, playerId) { goalsData[team][index].playerId = playerId ? parseInt(playerId) : null; renderGoalsContainer(team); updateGoalCountersNew(); }
-        function updateGoalPlayerAssist(team, index, assistId) { goalsData[team][index].assistId = assistId ? parseInt(assistId) : null; }
-        function validateGoalsComplete() { let missingPlayers = []; goalsData.A.forEach((goal, idx) => { if (!goal.playerId) missingPlayers.push(`Squadra A - Goal ${idx + 1}`); }); goalsData.B.forEach((goal, idx) => { if (!goal.playerId) missingPlayers.push(`Squadra B - Goal ${idx + 1}`); }); return { valid: missingPlayers.length === 0, missing: missingPlayers }; }
-        function renderGoalsContainer(team) { const container = document.getElementById(`goals${team}Container`); const teamPlayers = getCurrentTeamPlayers(team); const opposingTeamPlayers = team === 'A' ? getCurrentTeamPlayers('B') : getCurrentTeamPlayers('A'); if (!container) return; if (goalsData[team].length === 0) { container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;"><i class="fas fa-info-circle"></i> Nessun evento. Aggiungi un marcatore.</p>'; return; } container.innerHTML = goalsData[team].map((goal, idx) => { const isOwnGoal = goal.isOwnGoal; const availablePlayers = isOwnGoal ? opposingTeamPlayers : teamPlayers; const availableForAssist = teamPlayers.filter(p => p.id !== goal.playerId); const hasMissingPlayer = !goal.playerId; return `<div class="goal-player-group"><div class="goal-player-header"><select class="goal-type-select" onchange="updateGoalPlayerType('${team}', ${idx}, this.value)" style="padding:10px; width:130px;"><option value="false" ${!isOwnGoal ? 'selected' : ''}>⚽ Goal</option><option value="true" ${isOwnGoal ? 'selected' : ''}>😵 Autorete</option></select><select onchange="updateGoalPlayerPlayer('${team}', ${idx}, this.value)" style="flex:2;padding:10px; ${hasMissingPlayer ? 'border-color:#e74c3c; background-color:#ffe6e6;' : ''}"><option value="">⚠️ Seleziona giocatore</option>${availablePlayers.map(p => `<option value="${p.id}" ${goal.playerId == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`).join('')}</select>${hasMissingPlayer ? '<span style="color:#e74c3c; font-size:0.7rem;"><i class="fas fa-exclamation-triangle"></i> Obbligatorio</span>' : ''}</div>${!isOwnGoal ? `<div class="goal-player-header"><select onchange="updateGoalPlayerAssist('${team}', ${idx}, this.value)" style="flex:2;padding:10px; margin-left:142px;"><option value="">Nessun assist</option>${availableForAssist.map(p => `<option value="${p.id}" ${goal.assistId == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`).join('')}</select></div>` : ''}<div class="goal-player-header"><button class="remove-goal-player" onclick="removeGoalPlayer('${team}', ${idx})"><i class="fas fa-trash-alt"></i> Rimuovi</button></div></div>`; }).join(''); }
-        function getCurrentTeamPlayers(team) { const selectors = document.querySelectorAll(`#team${team}Selectors select`); const ids = []; selectors.forEach(s => { const v = parseInt(s.value); if (!isNaN(v) && v > 0) ids.push(v); }); return players.filter(p => ids.includes(p.id)); }
+        function removeGoalPlayer(team, idx) { goalsData[team].splice(idx, 1); renderGoalsContainer(team); updateGoalCountersNew(); }
+        function updateGoalPlayerType(team, idx, val) { goalsData[team][idx].isOwnGoal = val === 'true'; goalsData[team][idx].assistId = null; goalsData[team][idx].playerId = null; renderGoalsContainer(team); updateGoalCountersNew(); }
+        function updateGoalPlayerPlayer(team, idx, playerId) { goalsData[team][idx].playerId = playerId ? parseInt(playerId) : null; renderGoalsContainer(team); updateGoalCountersNew(); }
+        function updateGoalPlayerAssist(team, idx, assistId) { goalsData[team][idx].assistId = assistId ? parseInt(assistId) : null; }
+        function validateGoalsComplete() { let missing = []; goalsData.A.forEach((g, i) => { if (!g.playerId) missing.push(`Squadra A - Goal ${i+1}`); }); goalsData.B.forEach((g, i) => { if (!g.playerId) missing.push(`Squadra B - Goal ${i+1}`); }); return { valid: missing.length === 0, missing }; }
+        function renderGoalsContainer(team) { const container = document.getElementById(`goals${team}Container`); if (!container) return; const teamPlayers = getCurrentTeamPlayers(team); const oppPlayers = team === 'A' ? getCurrentTeamPlayers('B') : getCurrentTeamPlayers('A'); if (goalsData[team].length === 0) { container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;"><i class="fas fa-info-circle"></i> Nessun evento.</p>'; return; } container.innerHTML = goalsData[team].map((g, idx) => { const isOwn = g.isOwnGoal; const avail = isOwn ? oppPlayers : teamPlayers; const availAssist = teamPlayers.filter(p => p.id !== g.playerId); const missing = !g.playerId; return `<div class="goal-player-group"><div class="goal-player-header"><select class="goal-type-select" onchange="updateGoalPlayerType('${team}', ${idx}, this.value)" style="padding:10px;width:130px;"><option value="false" ${!isOwn ? 'selected' : ''}>⚽ Goal</option><option value="true" ${isOwn ? 'selected' : ''}>😵 Autorete</option></select><select onchange="updateGoalPlayerPlayer('${team}', ${idx}, this.value)" style="flex:2;padding:10px; ${missing ? 'border-color:#e74c3c;background:#ffe6e6;' : ''}"><option value="">⚠️ Seleziona</option>${avail.map(p => `<option value="${p.id}" ${g.playerId == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`).join('')}</select>${missing ? '<span style="color:#e74c3c;"><i class="fas fa-exclamation-triangle"></i> Obbligatorio</span>' : ''}</div>${!isOwn ? `<div class="goal-player-header"><select onchange="updateGoalPlayerAssist('${team}', ${idx}, this.value)" style="flex:2;padding:10px;margin-left:142px;"><option value="">Nessun assist</option>${availAssist.map(p => `<option value="${p.id}" ${g.assistId == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`).join('')}</select></div>` : ''}<div class="goal-player-header"><button class="remove-goal-player" onclick="removeGoalPlayer('${team}', ${idx})"><i class="fas fa-trash-alt"></i> Rimuovi</button></div></div>`; }).join(''); }
+        function getCurrentTeamPlayers(team) { const ids = []; for (let i=1; i<=playersPerTeam; i++) { const sel = document.getElementById(`team${team}_${i}`); if (sel && sel.value) ids.push(parseInt(sel.value)); } return players.filter(p => ids.includes(p.id)); }
         function collectGoalsFromData(team) { const goals = []; goalsData[team].forEach(g => { if (g.playerId) goals.push({ playerId: g.playerId, isOwnGoal: g.isOwnGoal, assistId: g.assistId }); }); return goals; }
-        function updateMatchSelectors() { const teamAContainer = document.getElementById('teamASelectors'); const teamBContainer = document.getElementById('teamBSelectors'); if (!teamAContainer || !teamBContainer) return; const allPlayersList = getSortedPlayers(); let htmlA = ''; for (let i = 1; i <= playersPerTeam; i++) { htmlA += `<select class="players-select" id="teamA_${i}" required onchange="updateSelectOptions()"><option value="">Giocatore ${i}</option>${allPlayersList.map(p => `<option value="${p.id}">${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`).join('')}</select>`; } teamAContainer.innerHTML = htmlA; let htmlB = ''; for (let i = 1; i <= playersPerTeam; i++) { htmlB += `<select class="players-select" id="teamB_${i}" required onchange="updateSelectOptions()"><option value="">Giocatore ${i}</option>${allPlayersList.map(p => `<option value="${p.id}">${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`).join('')}</select>`; } teamBContainer.innerHTML = htmlB; updateSelectOptions(); }
-        function updateSelectOptions() { const selectedInA = []; for (let i = 1; i <= playersPerTeam; i++) { const selectA = document.getElementById(`teamA_${i}`); if (selectA && selectA.value) selectedInA.push(parseInt(selectA.value)); } const selectedInB = []; for (let i = 1; i <= playersPerTeam; i++) { const selectB = document.getElementById(`teamB_${i}`); if (selectB && selectB.value) selectedInB.push(parseInt(selectB.value)); } for (let i = 1; i <= playersPerTeam; i++) { const selectA = document.getElementById(`teamA_${i}`); if (selectA) { const currentValue = selectA.value; const excludeIds = [...selectedInA.filter(id => id != currentValue), ...selectedInB]; const availablePlayers = players.filter(p => !excludeIds.includes(p.id)); let options = '<option value="">Seleziona giocatore</option>'; availablePlayers.forEach(p => { options += `<option value="${p.id}" ${currentValue == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`; }); selectA.innerHTML = options; } } for (let i = 1; i <= playersPerTeam; i++) { const selectB = document.getElementById(`teamB_${i}`); if (selectB) { const currentValue = selectB.value; const excludeIds = [...selectedInB.filter(id => id != currentValue), ...selectedInA]; const availablePlayers = players.filter(p => !excludeIds.includes(p.id)); let options = '<option value="">Seleziona giocatore</option>'; availablePlayers.forEach(p => { options += `<option value="${p.id}" ${currentValue == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`; }); selectB.innerHTML = options; } } updateMvpAndGkSelectors(); }
+        function updateMatchSelectors() { const aContainer = document.getElementById('teamASelectors'); const bContainer = document.getElementById('teamBSelectors'); if (!aContainer || !bContainer) return; const all = getSortedPlayers(); let aHtml = '', bHtml = ''; for (let i=1; i<=playersPerTeam; i++) { aHtml += `<select class="players-select" id="teamA_${i}" required onchange="updateSelectOptions()"><option value="">Giocatore ${i}</option>${all.map(p => `<option value="${p.id}">${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`).join('')}</select>`; bHtml += `<select class="players-select" id="teamB_${i}" required onchange="updateSelectOptions()"><option value="">Giocatore ${i}</option>${all.map(p => `<option value="${p.id}">${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`).join('')}</select>`; } aContainer.innerHTML = aHtml; bContainer.innerHTML = bHtml; updateSelectOptions(); }
+        function updateSelectOptions() { const selectedA = []; for (let i=1; i<=playersPerTeam; i++) { const sel = document.getElementById(`teamA_${i}`); if (sel && sel.value) selectedA.push(parseInt(sel.value)); } const selectedB = []; for (let i=1; i<=playersPerTeam; i++) { const sel = document.getElementById(`teamB_${i}`); if (sel && sel.value) selectedB.push(parseInt(sel.value)); } for (let i=1; i<=playersPerTeam; i++) { const selA = document.getElementById(`teamA_${i}`); if (selA) { const cur = selA.value; const exclude = [...selectedA.filter(id => id != cur), ...selectedB]; const avail = players.filter(p => !exclude.includes(p.id)); let opts = '<option value="">Seleziona</option>'; avail.forEach(p => { opts += `<option value="${p.id}" ${cur == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`; }); selA.innerHTML = opts; } const selB = document.getElementById(`teamB_${i}`); if (selB) { const cur = selB.value; const exclude = [...selectedB.filter(id => id != cur), ...selectedA]; const avail = players.filter(p => !exclude.includes(p.id)); let opts = '<option value="">Seleziona</option>'; avail.forEach(p => { opts += `<option value="${p.id}" ${cur == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`; }); selB.innerHTML = opts; } } updateMvpAndGkSelectors(); }
         
         function generateSummaryContent(teamAIds, teamBIds, goalsA, goalsB, mvpId, bestGkId, date) {
             const teamAName = teamSettings.nameA; const teamBName = teamSettings.nameB;
@@ -1226,7 +800,7 @@
         
         function addMatch() { 
             if (!isAdminMode) { 
-                showAlert('⚠️ Devi prima sbloccare la modalità Admin! Clicca su "Admin" in alto a destra e inserisci la password.', 'error'); 
+                showAlert('⚠️ Devi prima sbloccare la modalità Admin!', 'error'); 
                 return false; 
             } 
             
@@ -1234,7 +808,6 @@
             for (let i = 1; i <= playersPerTeam; i++) { 
                 const pa = document.getElementById(`teamA_${i}`); 
                 const pb = document.getElementById(`teamB_${i}`);
-                
                 if (!pa || !pb || !pa.value || !pb.value) { 
                     showAlert(`⚠️ Seleziona tutti i giocatori! (posizione ${i})`, 'error'); 
                     return false; 
@@ -1243,24 +816,13 @@
                 teamBIds.push(parseInt(pb.value)); 
             } 
             
-            if (new Set(teamAIds).size !== teamAIds.length) { 
-                showAlert('⚠️ Giocatori duplicati in Squadra A!', 'error'); 
-                return false; 
-            } 
-            if (new Set(teamBIds).size !== teamBIds.length) { 
-                showAlert('⚠️ Giocatori duplicati in Squadra B!', 'error'); 
-                return false; 
-            } 
-            for (let id of teamAIds) {
-                if (teamBIds.includes(id)) { 
-                    showAlert('⚠️ Stesso giocatore in entrambe le squadre!', 'error'); 
-                    return false; 
-                } 
-            }
+            if (new Set(teamAIds).size !== teamAIds.length) { showAlert('⚠️ Giocatori duplicati in Squadra A!', 'error'); return false; }
+            if (new Set(teamBIds).size !== teamBIds.length) { showAlert('⚠️ Giocatori duplicati in Squadra B!', 'error'); return false; }
+            for (let id of teamAIds) if (teamBIds.includes(id)) { showAlert('⚠️ Stesso giocatore in entrambe le squadre!', 'error'); return false; }
             
             const goalsCheck = validateGoalsComplete(); 
             if (!goalsCheck.valid) { 
-                showAlert(`❌ Impossibile salvare: i seguenti goal non hanno un giocatore selezionato:\n${goalsCheck.missing.join('\n')}`, 'error'); 
+                showAlert(`❌ Impossibile salvare: ${goalsCheck.missing.join('\n')}`, 'error'); 
                 return false; 
             } 
             
@@ -1269,30 +831,18 @@
             const mvpId = document.getElementById('mvp').value; 
             const bestGkId = document.getElementById('bestGoalkeeper').value; 
             const date = document.getElementById('matchDate').value; 
-            
-            if (!date) { 
-                showAlert('⚠️ Seleziona la data della partita!', 'error'); 
-                return false; 
-            }
+            if (!date) { showAlert('⚠️ Seleziona la data della partita!', 'error'); return false; }
             
             const performSave = function() {
                 const match = { 
-                    id: Date.now(), 
-                    teamAName: teamSettings.nameA, 
-                    teamBName: teamSettings.nameB, 
-                    teamA: teamAIds, 
-                    teamB: teamBIds, 
-                    goalsA: goalsA.length, 
-                    goalsB: goalsB.length, 
-                    goalsDetailA: goalsA, 
-                    goalsDetailB: goalsB, 
-                    mvp: mvpId ? parseInt(mvpId) : null, 
-                    bestGoalkeeper: bestGkId ? parseInt(bestGkId) : null, 
-                    date: date, 
-                    winner: goalsA.length > goalsB.length ? 'A' : (goalsB.length > goalsA.length ? 'B' : 'draw') 
+                    id: Date.now(), teamAName: teamSettings.nameA, teamBName: teamSettings.nameB,
+                    teamA: teamAIds, teamB: teamBIds, goalsA: goalsA.length, goalsB: goalsB.length,
+                    goalsDetailA: goalsA, goalsDetailB: goalsB,
+                    mvp: mvpId ? parseInt(mvpId) : null, bestGoalkeeper: bestGkId ? parseInt(bestGkId) : null,
+                    date: date, winner: goalsA.length > goalsB.length ? 'A' : (goalsB.length > goalsA.length ? 'B' : 'draw')
                 }; 
                 matches.push(match); 
-                saveCampionatoData(); 
+                saveCampionatoDataToFirestore(); 
                 calculateAllStats(); 
                 updateAll(); 
                 hideNewMatchForm(); 
@@ -1304,14 +854,10 @@
             
             if (missingMvp || missingGk) {
                 let warningMessage = '⚠️ Attenzione: '; 
-                if (missingMvp && missingGk) {
-                    warningMessage += 'non hai selezionato né il Miglior Giocatore (MVP) né il Miglior Portiere.'; 
-                } else if (missingMvp) {
-                    warningMessage += 'non hai selezionato il Miglior Giocatore (MVP).'; 
-                } else {
-                    warningMessage += 'non hai selezionato il Miglior Portiere.'; 
-                }
-                warningMessage += '\n\nLe statistiche relative ai premi saranno incomplete.\n\nVuoi salvare la partita comunque?';
+                if (missingMvp && missingGk) warningMessage += 'non hai selezionato né MVP né Miglior Portiere.';
+                else if (missingMvp) warningMessage += 'non hai selezionato MVP.';
+                else warningMessage += 'non hai selezionato Miglior Portiere.';
+                warningMessage += '\n\nLe statistiche saranno incomplete.\n\nVuoi salvare comunque?';
                 showConfirmDialog(warningMessage, performSave, null); 
                 return false; 
             }
@@ -1321,368 +867,160 @@
             return false; 
         }
         
-        // FUNZIONI MODIFICA PARTITA (versione semplificata per brevità, mantenute dall'originale)
-        function editMatch(matchId) { 
-            if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } 
-            editingMatchId = matchId; 
-            const match = matches.find(m => m.id === matchId); 
-            if (!match) return; 
-            document.getElementById('editMatchModal').style.display = 'flex'; 
-            showAlert('Funzione di modifica partita disponibile nella versione completa', 'info');
-        }
-        
-        function deleteMatch(matchId) { 
-            if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; } 
-            if (confirm('Eliminare questa partita?')) { 
-                matches = matches.filter(m => m.id !== matchId); 
-                saveCampionatoData(); 
-                calculateAllStats(); 
-                updateAll(); 
-                showAlert('Partita eliminata!', 'success'); 
-            } 
-        }
-        
+        function editMatch(matchId) { if (!isAdminMode) { showAlert('Sblocca modalità Admin!', 'error'); return; } editingMatchId = matchId; const match = matches.find(m => m.id === matchId); if (!match) return; showAlert('Funzione modifica in sviluppo', 'info'); }
+        function deleteMatch(matchId) { if (!isAdminMode) { showAlert('Sblocca modalità Admin!', 'error'); return; } if (confirm('Eliminare questa partita?')) { matches = matches.filter(m => m.id !== matchId); saveCampionatoDataToFirestore(); calculateAllStats(); updateAll(); showAlert('Partita eliminata!', 'success'); } }
         function closeEditModal() { document.getElementById('editMatchModal').style.display = 'none'; editingMatchId = null; }
         
         // ========== CALCOLO STATISTICHE ==========
         function calculateAllStats() {
-            for (let i = 0; i < players.length; i++) {
-                const p = players[i];
-                p.goalsScored = 0;
-                p.assists = 0;
-                p.ownGoals = 0;
-                p.matchesPlayed = 0;
-                p.wins = 0;
-                p.draws = 0;
-                p.losses = 0;
-                p.mvpAwards = 0;
-                p.goalsConceded = 0;
-                p.cleanSheets = 0;
-                p.matchesAsGoalkeeper = 0;
-                p.bestGoalkeeperAwards = 0;
+            for (let p of players) {
+                p.goalsScored = p.assists = p.ownGoals = p.matchesPlayed = p.wins = p.draws = p.losses = p.mvpAwards = p.goalsConceded = p.cleanSheets = p.matchesAsGoalkeeper = p.bestGoalkeeperAwards = 0;
             }
-            
-            for (let i = 0; i < matches.length; i++) {
-                const match = matches[i];
-                
-                const teamAPlayers = [];
-                const teamBPlayers = [];
-                for (let j = 0; j < players.length; j++) {
-                    if (match.teamA && match.teamA.indexOf(players[j].id) !== -1) {
-                        teamAPlayers.push(players[j]);
-                    }
-                    if (match.teamB && match.teamB.indexOf(players[j].id) !== -1) {
-                        teamBPlayers.push(players[j]);
-                    }
+            for (let match of matches) {
+                const teamAP = [], teamBP = [];
+                for (let p of players) {
+                    if (match.teamA?.includes(p.id)) teamAP.push(p);
+                    if (match.teamB?.includes(p.id)) teamBP.push(p);
                 }
-                
-                for (let j = 0; j < teamAPlayers.length; j++) {
-                    teamAPlayers[j].matchesPlayed++;
-                    if (match.winner === 'A') teamAPlayers[j].wins++;
-                    else if (match.winner === 'draw') teamAPlayers[j].draws++;
-                    else if (match.winner === 'B') teamAPlayers[j].losses++;
-                }
-                for (let j = 0; j < teamBPlayers.length; j++) {
-                    teamBPlayers[j].matchesPlayed++;
-                    if (match.winner === 'B') teamBPlayers[j].wins++;
-                    else if (match.winner === 'draw') teamBPlayers[j].draws++;
-                    else if (match.winner === 'A') teamBPlayers[j].losses++;
-                }
-                
-                for (let j = 0; j < teamAPlayers.length; j++) {
-                    if (teamAPlayers[j].isGoalkeeper) {
-                        teamAPlayers[j].matchesAsGoalkeeper++;
-                        teamAPlayers[j].goalsConceded += (match.goalsB || 0);
-                        if (match.goalsB === 0) teamAPlayers[j].cleanSheets++;
+                for (let p of teamAP) { p.matchesPlayed++; if (match.winner === 'A') p.wins++; else if (match.winner === 'draw') p.draws++; else p.losses++; }
+                for (let p of teamBP) { p.matchesPlayed++; if (match.winner === 'B') p.wins++; else if (match.winner === 'draw') p.draws++; else p.losses++; }
+                for (let p of teamAP) if (p.isGoalkeeper) { p.matchesAsGoalkeeper++; p.goalsConceded += (match.goalsB || 0); if (match.goalsB === 0) p.cleanSheets++; }
+                for (let p of teamBP) if (p.isGoalkeeper) { p.matchesAsGoalkeeper++; p.goalsConceded += (match.goalsA || 0); if (match.goalsA === 0) p.cleanSheets++; }
+                if (match.goalsDetailA) for (let g of match.goalsDetailA) {
+                    const scorer = players.find(p => p.id === g.playerId);
+                    if (scorer) {
+                        if (g.isOwnGoal) scorer.ownGoals++;
+                        else { scorer.goalsScored++; if (g.assistId && g.assistId !== g.playerId) { const a = players.find(p => p.id === g.assistId); if (a) a.assists++; } }
                     }
                 }
-                for (let j = 0; j < teamBPlayers.length; j++) {
-                    if (teamBPlayers[j].isGoalkeeper) {
-                        teamBPlayers[j].matchesAsGoalkeeper++;
-                        teamBPlayers[j].goalsConceded += (match.goalsA || 0);
-                        if (match.goalsA === 0) teamBPlayers[j].cleanSheets++;
+                if (match.goalsDetailB) for (let g of match.goalsDetailB) {
+                    const scorer = players.find(p => p.id === g.playerId);
+                    if (scorer) {
+                        if (g.isOwnGoal) scorer.ownGoals++;
+                        else { scorer.goalsScored++; if (g.assistId && g.assistId !== g.playerId) { const a = players.find(p => p.id === g.assistId); if (a) a.assists++; } }
                     }
                 }
-                
-                if (match.goalsDetailA) {
-                    for (let j = 0; j < match.goalsDetailA.length; j++) {
-                        const g = match.goalsDetailA[j];
-                        const scorer = players.find(p => p.id === g.playerId);
-                        if (scorer) {
-                            if (g.isOwnGoal) {
-                                scorer.ownGoals++;
-                            } else {
-                                scorer.goalsScored++;
-                                if (g.assistId && g.assistId !== g.playerId) {
-                                    const assister = players.find(p => p.id === g.assistId);
-                                    if (assister) assister.assists++;
-                                }
-                            }
-                        }
-                    }
-                }
-                if (match.goalsDetailB) {
-                    for (let j = 0; j < match.goalsDetailB.length; j++) {
-                        const g = match.goalsDetailB[j];
-                        const scorer = players.find(p => p.id === g.playerId);
-                        if (scorer) {
-                            if (g.isOwnGoal) {
-                                scorer.ownGoals++;
-                            } else {
-                                scorer.goalsScored++;
-                                if (g.assistId && g.assistId !== g.playerId) {
-                                    const assister = players.find(p => p.id === g.assistId);
-                                    if (assister) assister.assists++;
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                if (match.mvp) {
-                    const mvp = players.find(p => p.id === match.mvp);
-                    if (mvp) mvp.mvpAwards++;
-                }
-                
-                if (match.bestGoalkeeper) {
-                    const bestGk = players.find(p => p.id === match.bestGoalkeeper);
-                    if (bestGk) bestGk.bestGoalkeeperAwards++;
-                }
+                if (match.mvp) { const mvp = players.find(p => p.id === match.mvp); if (mvp) mvp.mvpAwards++; }
+                if (match.bestGoalkeeper) { const gk = players.find(p => p.id === match.bestGoalkeeper); if (gk) gk.bestGoalkeeperAwards++; }
             }
-            
             updateAllRankings();
         }
         
         function updateAllRankings() {
-            updateTopScorersRanking();
-            updateAssistsRanking();
-            updateMVPRanking();
-            updateGoalkeepersStatsRanking();
-            updateBestGoalkeeperRanking();
-            updateGeneralRanking();
-            updateTeamRanking();
-            updateStatistics();
+            updateTopScorersRanking(); updateAssistsRanking(); updateMVPRanking();
+            updateGoalkeepersStatsRanking(); updateBestGoalkeeperRanking();
+            updateGeneralRanking(); updateTeamRanking(); updateStatistics();
         }
         
         function updateTopScorersRanking() {
-            const container = document.getElementById('topScorersRanking');
-            if (!container) return;
-            
-            const withGoals = players.filter(p => p.goalsScored > 0).sort((a, b) => b.goalsScored - a.goalsScored);
-            
-            if (withGoals.length === 0) {
-                container.innerHTML = '<p style="text-align:center;padding:20px;">Nessun goal segnato</p>';
-                return;
-            }
-            
+            const container = document.getElementById('topScorersRanking'); if (!container) return;
+            const withGoals = players.filter(p => p.goalsScored > 0).sort((a,b) => b.goalsScored - a.goalsScored);
+            if (withGoals.length === 0) { container.innerHTML = '<p style="text-align:center;padding:20px;">Nessun goal segnato</p>'; return; }
             let html = '<table class="ranking-table"><thead><tr><th>Pos</th><th>Giocatore</th><th>Goal</th><th>Partite</th><th>Media</th></tr></thead><tbody>';
-            for (let i = 0; i < withGoals.length; i++) {
-                const p = withGoals[i];
-                const media = p.matchesPlayed > 0 ? (p.goalsScored / p.matchesPlayed).toFixed(2) : '0.00';
-                html += `<tr class="${i === 0 ? 'rank-1' : ''}"><td>${i+1}${i === 0 ? ' 👑' : ''}</td><td><strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper ? ' 🧤' : ''}</td><td><strong>${p.goalsScored}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
+            for (let i=0; i<withGoals.length; i++) {
+                const p = withGoals[i]; const media = p.matchesPlayed > 0 ? (p.goalsScored / p.matchesPlayed).toFixed(2) : '0.00';
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}${i===0?' 👑':''}</td><td><strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' 🧤':''}</td><td><strong>${p.goalsScored}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
             }
-            html += '</tbody></table>';
-            container.innerHTML = html;
+            html += '</tbody></table>'; container.innerHTML = html;
         }
         
         function updateAssistsRanking() {
-            const container = document.getElementById('assistsRanking');
-            if (!container) return;
-            
-            const withAssists = players.filter(p => p.assists > 0).sort((a, b) => b.assists - a.assists);
-            
-            if (withAssists.length === 0) {
-                container.innerHTML = '<p style="text-align:center;padding:20px;">Nessun assist</p>';
-                return;
+            const container = document.getElementById('assistsRanking'); if (!container) return;
+            const withAssists = players.filter(p => p.assists > 0).sort((a,b) => b.assists - a.assists);
+            if (withAssists.length === 0) { container.innerHTML = '<p style="text-align:center;padding:20px;">Nessun assist</p>'; return; }
+            let html = '<table class="ranking-table"><thead><tr><th>Pos</th><th>Giocatore</th><th>Assist</th><th>Partite</th><th>Media</th></td></thead><tbody>';
+            for (let i=0; i<withAssists.length; i++) {
+                const p = withAssists[i]; const media = p.matchesPlayed > 0 ? (p.assists / p.matchesPlayed).toFixed(2) : '0.00';
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}${i===0?' 👑':''}</td><td><strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' 🧤':''}</td><td><strong>${p.assists}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
             }
-            
-            let html = '<table class="ranking-table"><thead><tr><th>Pos</th><th>Giocatore</th><th>Assist</th><th>Partite</th><th>Media</th></tr></thead><tbody>';
-            for (let i = 0; i < withAssists.length; i++) {
-                const p = withAssists[i];
-                const media = p.matchesPlayed > 0 ? (p.assists / p.matchesPlayed).toFixed(2) : '0.00';
-                html += `<tr class="${i === 0 ? 'rank-1' : ''}"><td>${i+1}${i === 0 ? ' 👑' : ''}</td><td><strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper ? ' 🧤' : ''}</td><td><strong>${p.assists}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
-            }
-            html += '</tbody></table>';
-            container.innerHTML = html;
+            html += '</tbody></table>'; container.innerHTML = html;
         }
         
         function updateMVPRanking() {
-            const container = document.getElementById('mvpRanking');
-            if (!container) return;
-            
-            const withMvp = players.filter(p => p.mvpAwards > 0).sort((a, b) => b.mvpAwards - a.mvpAwards);
-            
-            if (withMvp.length === 0) {
-                container.innerHTML = '<p style="text-align:center;padding:20px;">Nessun MVP assegnato</p>';
-                return;
-            }
-            
+            const container = document.getElementById('mvpRanking'); if (!container) return;
+            const withMvp = players.filter(p => p.mvpAwards > 0).sort((a,b) => b.mvpAwards - a.mvpAwards);
+            if (withMvp.length === 0) { container.innerHTML = '<p style="text-align:center;padding:20px;">Nessun MVP assegnato</p>'; return; }
             let html = '<table class="ranking-table"><thead><tr><th>Pos</th><th>Giocatore</th><th>MVP</th><th>Partite</th><th>Media</th></tr></thead><tbody>';
-            for (let i = 0; i < withMvp.length; i++) {
-                const p = withMvp[i];
-                const media = p.matchesPlayed > 0 ? (p.mvpAwards / p.matchesPlayed).toFixed(2) : '0.00';
-                html += `<tr class="${i === 0 ? 'rank-1' : ''}"><td>${i+1}${i === 0 ? ' 👑' : ''}</td><td><strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper ? ' 🧤' : ''}</td><td><strong>${p.mvpAwards}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
+            for (let i=0; i<withMvp.length; i++) {
+                const p = withMvp[i]; const media = p.matchesPlayed > 0 ? (p.mvpAwards / p.matchesPlayed).toFixed(2) : '0.00';
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}${i===0?' 👑':''}</td><td><strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' 🧤':''}<tr><td><strong>${p.mvpAwards}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
             }
-            html += '</tbody></table>';
-            container.innerHTML = html;
+            html += '</tbody></table>'; container.innerHTML = html;
         }
         
         function updateGoalkeepersStatsRanking() {
-            const container = document.getElementById('goalkeepersStatsRanking');
-            if (!container) return;
-            
-            const goalkeepers = players.filter(p => p.isGoalkeeper && p.matchesAsGoalkeeper > 0).sort((a, b) => (a.goalsConceded / a.matchesAsGoalkeeper) - (b.goalsConceded / b.matchesAsGoalkeeper));
-            
-            if (goalkeepers.length === 0) {
-                container.innerHTML = '<p style="text-align:center;padding:20px;">Nessun portiere ha giocato</p>';
-                return;
-            }
-            
+            const container = document.getElementById('goalkeepersStatsRanking'); if (!container) return;
+            const gks = players.filter(p => p.isGoalkeeper && p.matchesAsGoalkeeper > 0).sort((a,b) => (a.goalsConceded/a.matchesAsGoalkeeper) - (b.goalsConceded/b.matchesAsGoalkeeper));
+            if (gks.length === 0) { container.innerHTML = '<p style="text-align:center;padding:20px;">Nessun portiere ha giocato</p>'; return; }
             let html = '<table class="ranking-table"><thead><tr><th>Pos</th><th>Portiere</th><th>Partite</th><th>Gol Subiti</th><th>Media</th><th>Clean Sheet</th></tr></thead><tbody>';
-            for (let i = 0; i < goalkeepers.length; i++) {
-                const p = goalkeepers[i];
-                const media = (p.goalsConceded / p.matchesAsGoalkeeper).toFixed(2);
-                html += `<tr class="${i === 0 ? 'rank-1' : ''}"><td>${i+1}${i === 0 ? ' 🧤👑' : ''}</td><td><strong>${escapeHtml(p.name)}</strong> 🧤</td><td>${p.matchesAsGoalkeeper}</td><td>${p.goalsConceded}</td><td>${media}</td><td>${p.cleanSheets}</td></tr>`;
+            for (let i=0; i<gks.length; i++) {
+                const p = gks[i]; const media = (p.goalsConceded / p.matchesAsGoalkeeper).toFixed(2);
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}${i===0?' 🧤👑':''}</td><td><strong>${escapeHtml(p.name)}</strong> 🧤</td><td>${p.matchesAsGoalkeeper}</td><td>${p.goalsConceded}</td><td>${media}</td><td>${p.cleanSheets}</td></tr>`;
             }
-            html += '</tbody></table>';
-            container.innerHTML = html;
+            html += '</tbody></table>'; container.innerHTML = html;
         }
         
         function updateBestGoalkeeperRanking() {
-            const container = document.getElementById('bestGoalkeeperRanking');
-            if (!container) return;
-            
-            const withAwards = players.filter(p => p.isGoalkeeper && p.bestGoalkeeperAwards > 0).sort((a, b) => b.bestGoalkeeperAwards - a.bestGoalkeeperAwards);
-            
-            if (withAwards.length === 0) {
-                container.innerHTML = '<p style="text-align:center;padding:20px;">Nessun premio assegnato</p>';
-                return;
+            const container = document.getElementById('bestGoalkeeperRanking'); if (!container) return;
+            const withAwards = players.filter(p => p.isGoalkeeper && p.bestGoalkeeperAwards > 0).sort((a,b) => b.bestGoalkeeperAwards - a.bestGoalkeeperAwards);
+            if (withAwards.length === 0) { container.innerHTML = '<p style="text-align:center;padding:20px;">Nessun premio assegnato</p>'; return; }
+            let html = '<table class="ranking-table"><thead><tr><th>Pos</th><th>Portiere</th><th>Premi</th><th>Partite</th><th>Media</th></td></thead><tbody>';
+            for (let i=0; i<withAwards.length; i++) {
+                const p = withAwards[i]; const media = p.matchesPlayed > 0 ? (p.bestGoalkeeperAwards / p.matchesPlayed).toFixed(2) : '0.00';
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}${i===0?' 👑':''}</td><td><strong>${escapeHtml(p.name)}</strong> 🧤</td><td><strong>${p.bestGoalkeeperAwards}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
             }
-            
-            let html = '<table class="ranking-table"><thead><tr><th>Pos</th><th>Portiere</th><th>Premi</th><th>Partite</th><th>Media</th></tr></thead><tbody>';
-            for (let i = 0; i < withAwards.length; i++) {
-                const p = withAwards[i];
-                const media = p.matchesPlayed > 0 ? (p.bestGoalkeeperAwards / p.matchesPlayed).toFixed(2) : '0.00';
-                html += `<tr class="${i === 0 ? 'rank-1' : ''}"><td>${i+1}${i === 0 ? ' 👑' : ''}</td><td><strong>${escapeHtml(p.name)}</strong> 🧤</td><td><strong>${p.bestGoalkeeperAwards}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
-            }
-            html += '</tbody></table>';
-            container.innerHTML = html;
+            html += '</tbody></table>'; container.innerHTML = html;
         }
         
         function updateGeneralRanking() {
-            const container = document.getElementById('generalRanking');
-            if (!container) return;
-            
-            const withPoints = players.map(p => ({ player: p, points: p.wins * 3 + p.draws })).sort((a, b) => b.points - a.points);
-            
-            if (players.length === 0) {
-                container.innerHTML = '<p style="text-align:center;padding:20px;">Nessun giocatore</p>';
-                return;
-            }
-            
+            const container = document.getElementById('generalRanking'); if (!container) return;
+            const withPoints = players.map(p => ({ player:p, points: p.wins*3 + p.draws })).sort((a,b) => b.points - a.points);
+            if (players.length === 0) { container.innerHTML = '<p style="text-align:center;padding:20px;">Nessun giocatore</p>'; return; }
             let html = '<table class="ranking-table"><thead><tr><th>Pos</th><th>Giocatore</th><th>Pti</th><th>G</th><th>V</th><th>N</th><th>P</th><th>GF</th><th>GS</th><th>Diff</th></tr></thead><tbody>';
-            for (let i = 0; i < withPoints.length; i++) {
-                const p = withPoints[i].player;
-                const points = withPoints[i].points;
-                const diff = p.goalsScored - p.goalsConceded;
-                html += `<tr class="${i === 0 ? 'rank-1' : ''}"><td>${i+1}${i === 0 ? ' 👑' : ''}</td><td><strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper ? ' 🧤' : ''}</td><td><strong>${points}</strong></td><td>${p.matchesPlayed}</td><td>${p.wins}</td><td>${p.draws}</td><td>${p.losses}</td><td>${p.goalsScored}</td><td>${p.goalsConceded}</td><td>${diff}</td></tr>`;
+            for (let i=0; i<withPoints.length; i++) {
+                const p = withPoints[i].player; const points = withPoints[i].points; const diff = p.goalsScored - p.goalsConceded;
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}${i===0?' 👑':''}</td><td><strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' 🧤':''}</td><td><strong>${points}</strong></td><td>${p.matchesPlayed}</td><td>${p.wins}</td><td>${p.draws}</td><td>${p.losses}</td><td>${p.goalsScored}</td><td>${p.goalsConceded}</td><td>${diff}</td></tr>`;
             }
-            html += '</tbody></table>';
-            container.innerHTML = html;
+            html += '</tbody></table>'; container.innerHTML = html;
         }
         
         function updateTeamRanking() {
-            const container = document.getElementById('teamRanking');
-            if (!container) return;
-            
-            const teamStats = {
-                [teamSettings.nameA]: { wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0 },
-                [teamSettings.nameB]: { wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0 }
-            };
-            
-            for (let i = 0; i < matches.length; i++) {
-                const m = matches[i];
-                
-                if (teamStats[m.teamAName]) {
-                    teamStats[m.teamAName].goalsFor += m.goalsA;
-                    teamStats[m.teamAName].goalsAgainst += m.goalsB;
-                }
-                if (teamStats[m.teamBName]) {
-                    teamStats[m.teamBName].goalsFor += m.goalsB;
-                    teamStats[m.teamBName].goalsAgainst += m.goalsA;
-                }
-                
-                if (m.winner === 'A') {
-                    if (teamStats[m.teamAName]) teamStats[m.teamAName].wins++;
-                    if (teamStats[m.teamBName]) teamStats[m.teamBName].losses++;
-                } else if (m.winner === 'B') {
-                    if (teamStats[m.teamBName]) teamStats[m.teamBName].wins++;
-                    if (teamStats[m.teamAName]) teamStats[m.teamAName].losses++;
-                } else if (m.winner === 'draw') {
-                    if (teamStats[m.teamAName]) teamStats[m.teamAName].draws++;
-                    if (teamStats[m.teamBName]) teamStats[m.teamBName].draws++;
-                }
+            const container = document.getElementById('teamRanking'); if (!container) return;
+            const stats = { [teamSettings.nameA]: { wins:0, draws:0, losses:0, gf:0, ga:0 }, [teamSettings.nameB]: { wins:0, draws:0, losses:0, gf:0, ga:0 } };
+            for (let m of matches) {
+                if (stats[m.teamAName]) { stats[m.teamAName].gf += m.goalsA; stats[m.teamAName].ga += m.goalsB; }
+                if (stats[m.teamBName]) { stats[m.teamBName].gf += m.goalsB; stats[m.teamBName].ga += m.goalsA; }
+                if (m.winner === 'A') { if (stats[m.teamAName]) stats[m.teamAName].wins++; if (stats[m.teamBName]) stats[m.teamBName].losses++; }
+                else if (m.winner === 'B') { if (stats[m.teamBName]) stats[m.teamBName].wins++; if (stats[m.teamAName]) stats[m.teamAName].losses++; }
+                else if (m.winner === 'draw') { if (stats[m.teamAName]) stats[m.teamAName].draws++; if (stats[m.teamBName]) stats[m.teamBName].draws++; }
             }
-            
-            const teams = Object.keys(teamStats).map(name => {
-                const stats = teamStats[name];
-                const points = stats.wins * 3 + stats.draws;
-                const diff = stats.goalsFor - stats.goalsAgainst;
-                return { name, points, diff, stats };
-            }).sort((a, b) => {
-                if (a.points !== b.points) return b.points - a.points;
-                return b.diff - a.diff;
-            });
-            
-            if (matches.length === 0) {
-                container.innerHTML = '<p style="text-align:center;padding:20px;">Nessuna partita disputata</p>';
-                return;
-            }
-            
+            const teams = Object.keys(stats).map(name => {
+                const s = stats[name]; const points = s.wins*3 + s.draws; const diff = s.gf - s.ga;
+                return { name, points, diff, stats: s };
+            }).sort((a,b) => { if (a.points !== b.points) return b.points - a.points; return b.diff - a.diff; });
+            if (matches.length === 0) { container.innerHTML = '<p style="text-align:center;padding:20px;">Nessuna partita disputata</p>'; return; }
             let html = '<table class="ranking-table"><thead><tr><th>Pos</th><th>Squadra</th><th>Pti</th><th>G</th><th>V</th><th>N</th><th>P</th><th>GF</th><th>GS</th><th>Diff</th></tr></thead><tbody>';
-            for (let i = 0; i < teams.length; i++) {
-                const t = teams[i];
-                const totalMatches = t.stats.wins + t.stats.draws + t.stats.losses;
-                html += `<tr class="${i === 0 ? 'rank-1' : ''}"><td>${i+1}${i === 0 ? ' 👑' : ''}</td><td><strong>${escapeHtml(t.name)}</strong></td><td><strong>${t.points}</strong></td><td>${totalMatches}</td><td>${t.stats.wins}</td><td>${t.stats.draws}</td><td>${t.stats.losses}</td><td>${t.stats.goalsFor}</td><td>${t.stats.goalsAgainst}</td><td>${t.diff}</td></tr>`;
+            for (let i=0; i<teams.length; i++) {
+                const t = teams[i]; const total = t.stats.wins + t.stats.draws + t.stats.losses;
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}${i===0?' 👑':''}</td><td><strong>${escapeHtml(t.name)}</strong></td><td><strong>${t.points}</strong></td><td>${total}</td><td>${t.stats.wins}</td><td>${t.stats.draws}</td><td>${t.stats.losses}</td><td>${t.stats.gf}</td><td>${t.stats.ga}</td><td>${t.diff}</td></tr>`;
             }
-            html += '</tbody></table>';
-            container.innerHTML = html;
+            html += '</tbody></table>'; container.innerHTML = html;
         }
         
         function updateStatistics() {
-            let totalGoals = 0, totalAssists = 0, totalOwnGoals = 0;
-            
-            for (let i = 0; i < matches.length; i++) {
-                const m = matches[i];
+            let totalGoals=0, totalAssists=0, totalOwn=0;
+            for (let m of matches) {
                 totalGoals += m.goalsA + m.goalsB;
-                
-                if (m.goalsDetailA) {
-                    for (let j = 0; j < m.goalsDetailA.length; j++) {
-                        if (m.goalsDetailA[j].assistId && !m.goalsDetailA[j].isOwnGoal) totalAssists++;
-                        if (m.goalsDetailA[j].isOwnGoal) totalOwnGoals++;
-                    }
-                }
-                if (m.goalsDetailB) {
-                    for (let j = 0; j < m.goalsDetailB.length; j++) {
-                        if (m.goalsDetailB[j].assistId && !m.goalsDetailB[j].isOwnGoal) totalAssists++;
-                        if (m.goalsDetailB[j].isOwnGoal) totalOwnGoals++;
-                    }
-                }
+                if (m.goalsDetailA) for (let g of m.goalsDetailA) { if (g.assistId && !g.isOwnGoal) totalAssists++; if (g.isOwnGoal) totalOwn++; }
+                if (m.goalsDetailB) for (let g of m.goalsDetailB) { if (g.assistId && !g.isOwnGoal) totalAssists++; if (g.isOwnGoal) totalOwn++; }
             }
-            
-            let bestScorer = { goals: 0, name: '---' };
-            let bestAssist = { assists: 0, name: '---' };
-            let bestMVP = { mvp: 0, name: '---' };
-            let bestGK = { gk: 0, name: '---' };
-            
-            for (let i = 0; i < players.length; i++) {
-                const p = players[i];
-                if (p.goalsScored > bestScorer.goals) bestScorer = { goals: p.goalsScored, name: p.name };
-                if (p.assists > bestAssist.assists) bestAssist = { assists: p.assists, name: p.name };
-                if (p.mvpAwards > bestMVP.mvp) bestMVP = { mvp: p.mvpAwards, name: p.name };
-                if (p.bestGoalkeeperAwards > bestGK.gk) bestGK = { gk: p.bestGoalkeeperAwards, name: p.name };
+            let bestScorer = { goals:0, name:'---' }, bestAssist = { assists:0, name:'---' }, bestMVP = { mvp:0, name:'---' }, bestGK = { gk:0, name:'---' };
+            for (let p of players) {
+                if (p.goalsScored > bestScorer.goals) bestScorer = { goals:p.goalsScored, name:p.name };
+                if (p.assists > bestAssist.assists) bestAssist = { assists:p.assists, name:p.name };
+                if (p.mvpAwards > bestMVP.mvp) bestMVP = { mvp:p.mvpAwards, name:p.name };
+                if (p.bestGoalkeeperAwards > bestGK.gk) bestGK = { gk:p.bestGoalkeeperAwards, name:p.name };
             }
-            
             document.getElementById('bestScorer').textContent = bestScorer.name !== '---' ? escapeHtml(bestScorer.name) : '---';
             document.getElementById('bestScorerCount').textContent = bestScorer.goals > 0 ? `${bestScorer.goals} goal` : '';
             document.getElementById('bestAssist').textContent = bestAssist.name !== '---' ? escapeHtml(bestAssist.name) : '---';
@@ -1691,100 +1029,35 @@
             document.getElementById('bestMVPCount').textContent = bestMVP.mvp > 0 ? `${bestMVP.mvp} MVP` : '';
             document.getElementById('bestGK').textContent = bestGK.name !== '---' ? escapeHtml(bestGK.name) : '---';
             document.getElementById('bestGKCount').textContent = bestGK.gk > 0 ? `${bestGK.gk} premi` : '';
-            
-            document.getElementById('generalStats').innerHTML = `
-                <div class="stat-card"><div class="stat-number">${matches.length}</div><div class="stat-label">Partite</div></div>
-                <div class="stat-card"><div class="stat-number">${players.length}</div><div class="stat-label">Giocatori</div></div>
-                <div class="stat-card"><div class="stat-number">${totalGoals}</div><div class="stat-label">Goal Totali</div></div>
-                <div class="stat-card"><div class="stat-number">${totalAssists}</div><div class="stat-label">Assist</div></div>
-                <div class="stat-card"><div class="stat-number">${totalOwnGoals}</div><div class="stat-label">Autoreti</div></div>
-            `;
+            document.getElementById('generalStats').innerHTML = `<div class="stat-card"><div class="stat-number">${matches.length}</div><div class="stat-label">Partite</div></div><div class="stat-card"><div class="stat-number">${players.length}</div><div class="stat-label">Giocatori</div></div><div class="stat-card"><div class="stat-number">${totalGoals}</div><div class="stat-label">Goal Totali</div></div><div class="stat-card"><div class="stat-number">${totalAssists}</div><div class="stat-label">Assist</div></div><div class="stat-card"><div class="stat-number">${totalOwn}</div><div class="stat-label">Autoreti</div></div>`;
         }
         
         // ========== UTILITY ==========
-        function showAlert(msg, type) { 
-            const d = document.createElement('div'); 
-            d.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`; 
-            d.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${type === 'success' ? '#27ae60' : '#e74c3c'};color:white;padding:12px 24px;border-radius:50px;z-index:1000;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:0 4px 15px rgba(0,0,0,0.2);`; 
-            document.body.appendChild(d); 
-            setTimeout(() => d.remove(), 4000); 
-        }
-        
-        function escapeHtml(t) { 
-            if (!t) return ''; 
-            const div = document.createElement('div'); 
-            div.textContent = t; 
-            return div.innerHTML; 
-        }
-        
-        function formatDate(d) { 
-            return new Date(d).toLocaleDateString('it-IT'); 
-        }
-        
-        function switchTab(tabName) { 
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); 
-            const panel = document.getElementById(tabName);
-            if (panel) panel.classList.add('active'); 
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
-            if (event && event.target && event.target.classList) event.target.classList.add('active'); 
-            if (tabName === 'classifiche') updateAllRankings(); 
-            if (tabName === 'statistiche') updateStatistics(); 
-        }
+        function showAlert(msg, type) { const d = document.createElement('div'); d.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':'exclamation-circle'}"></i> ${msg}`; d.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:${type==='success'?'#27ae60':'#e74c3c'};color:white;padding:12px 24px;border-radius:50px;z-index:1000;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:0 4px 15px rgba(0,0,0,0.2);`; document.body.appendChild(d); setTimeout(() => d.remove(), 4000); }
+        function escapeHtml(t) { if (!t) return ''; const div = document.createElement('div'); div.textContent = t; return div.innerHTML; }
+        function formatDate(d) { return new Date(d).toLocaleDateString('it-IT'); }
+        function switchTab(tabName) { document.querySelectorAll('.panel').forEach(p => p.classList.remove('active')); const panel = document.getElementById(tabName); if (panel) panel.classList.add('active'); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); if (event?.target?.classList) event.target.classList.add('active'); if (tabName === 'classifiche') updateAllRankings(); if (tabName === 'statistiche') updateStatistics(); }
         
         // Event listeners
-        const playerForm = document.getElementById('playerForm');
-        if (playerForm) {
-            playerForm.addEventListener('submit', (e) => { 
-                e.preventDefault(); 
-                const name = document.getElementById('playerName').value; 
-                const number = document.getElementById('playerNumber').value; 
-                const isGoalkeeper = document.getElementById('isGoalkeeper').checked; 
-                if (addPlayer(name, isGoalkeeper, pendingPhoto, number)) { 
-                    document.getElementById('playerName').value = ''; 
-                    document.getElementById('playerNumber').value = ''; 
-                    document.getElementById('isGoalkeeper').checked = false; 
-                    document.getElementById('playerPhotoPreview').style.display = 'none'; 
-                    document.getElementById('playerPhotoInput').value = ''; 
-                    pendingPhoto = null; 
-                    showAlert(`Giocatore ${name} aggiunto!`, 'success'); 
-                } 
-            });
-        }
+        document.getElementById('playerForm')?.addEventListener('submit', (e) => { e.preventDefault(); const name = document.getElementById('playerName').value; const number = document.getElementById('playerNumber').value; const isGk = document.getElementById('isGoalkeeper').checked; if (addPlayer(name, isGk, pendingPhoto, number)) { document.getElementById('playerName').value = ''; document.getElementById('playerNumber').value = ''; document.getElementById('isGoalkeeper').checked = false; document.getElementById('playerPhotoPreview').style.display = 'none'; document.getElementById('playerPhotoInput').value = ''; pendingPhoto = null; showAlert(`Giocatore ${name} aggiunto!`, 'success'); } });
+        document.getElementById('saveMatchBtn')?.addEventListener('click', () => addMatch());
+        document.getElementById('updateMatchBtn')?.addEventListener('click', () => showAlert('Modifica partita in sviluppo', 'info'));
+        document.getElementById('adminModalUnlockBtn')?.addEventListener('click', unlockAdmin);
+        document.getElementById('adminModalCloseBtn')?.addEventListener('click', closeAdminModal);
         
-        const saveMatchBtn = document.getElementById('saveMatchBtn');
-        if (saveMatchBtn) saveMatchBtn.addEventListener('click', () => { addMatch(); });
-        
-        const updateMatchBtn = document.getElementById('updateMatchBtn');
-        if (updateMatchBtn) updateMatchBtn.addEventListener('click', () => saveEditedMatch());
-        
-        const adminModalUnlockBtn = document.getElementById('adminModalUnlockBtn');
-        if (adminModalUnlockBtn) adminModalUnlockBtn.addEventListener('click', unlockAdmin);
-        
-        const adminModalCloseBtn = document.getElementById('adminModalCloseBtn');
-        if (adminModalCloseBtn) adminModalCloseBtn.addEventListener('click', closeAdminModal);
-        
-        // Avvio
         async function init() {
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
+            const saved = localStorage.getItem('currentUser');
+            if (saved) {
                 try {
-                    const { username, firebaseUid } = JSON.parse(savedUser);
-                    const currentAuthUser = auth.currentUser;
-                    if (currentAuthUser && currentAuthUser.uid === firebaseUid) {
+                    const { username, firebaseUid } = JSON.parse(saved);
+                    const authUser = auth.currentUser;
+                    if (authUser && authUser.uid === firebaseUid) {
                         const userDoc = await db.collection('users').doc(firebaseUid).get();
                         if (userDoc.exists) {
-                            const userData = userDoc.data();
-                            currentUser = {
-                                username: userData.username,
-                                email: userData.email,
-                                adminPassword: userData.adminPassword,
-                                campionati: userData.campionati || [],
-                                firebaseUid: firebaseUid
-                            };
-                            currentFirebaseUser = currentAuthUser;
-                            isLoggedIn = true;
-                            isAdminMode = false;
-                            
+                            const data = userDoc.data();
+                            currentUser = { username: data.username, email: data.email, adminPassword: data.adminPassword, campionati: data.campionati || [], firebaseUid };
+                            currentFirebaseUser = authUser;
+                            isLoggedIn = true; isAdminMode = false;
                             document.getElementById('loginOverlay').style.display = 'none';
                             document.getElementById('userBar').style.display = 'flex';
                             document.getElementById('currentUsername').textContent = currentUser.username;
@@ -1793,20 +1066,13 @@
                             document.getElementById('campionatiView').style.display = 'block';
                             await loadUserCampionati();
                             updateAdminUI();
-                            
-                            const campionati = currentUser?.campionati || [];
-                            if (campionati.length > 0) {
-                                caricaUltimoCampionato();
-                            }
+                            if (currentUser.campionati?.length > 0) caricaUltimoCampionato();
                         }
                     }
-                } catch(e) {
-                    console.log("Errore nel caricamento utente:", e);
-                }
+                } catch(e) { console.log(e); }
             }
             loadBackground();
         }
-        
         init();
     </script>
 </body>
