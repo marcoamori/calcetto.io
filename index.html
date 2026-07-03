@@ -45,76 +45,11 @@
         .btn-delete-camp { background: #e74c3c; padding: 5px 10px; font-size: 0.7em; margin-top: 10px; cursor: pointer; }
         
         .main-app { display: none; }
-        
-        /* HEADER MODERNO */
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-            padding: 30px 40px;
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px;
-            border: 1px solid rgba(255,255,255,0.15);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 30% 50%, rgba(46,204,113,0.1) 0%, transparent 60%);
-            animation: headerGlow 8s ease-in-out infinite;
-        }
-        
-        @keyframes headerGlow {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(10%, 10%); }
-        }
-        
-        .header h1 {
-            font-size: 2.8em;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffffff 0%, #a8e063 50%, #2ecc71 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 8px;
-            position: relative;
-            z-index: 1;
-            letter-spacing: -1px;
-        }
-        
-        .header p {
-            opacity: 0.85;
-            font-size: 1em;
-            position: relative;
-            z-index: 1;
-            font-weight: 400;
-            letter-spacing: 0.5px;
-        }
-        
-        .campionato-badge {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(5px);
-            padding: 6px 18px;
-            border-radius: 50px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            font-size: 0.8em;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s;
-        }
+        .header { text-align: center; color: white; margin-bottom: 20px; padding: 20px; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); border-radius: 30px; border: 1px solid rgba(255,255,255,0.2); }
+        .header h1 { font-size: 2.8em; font-weight: 800; background: linear-gradient(135deg, #fff, #a8e063); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
+        .header p { opacity: 0.8; font-size: 0.9em; }
+        .campionato-badge { background: rgba(255,255,255,0.15); backdrop-filter: blur(5px); padding: 6px 18px; border-radius: 50px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.8em; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
         .campionato-badge:hover { background: rgba(255,255,255,0.25); transform: scale(1.02); }
-        
         .admin-panel { margin-top: 15px; }
         .admin-badge { background: rgba(0,0,0,0.5); padding: 6px 15px; border-radius: 50px; font-size: 0.8em; display: inline-block; }
         
@@ -132,138 +67,81 @@
             text-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
         
-        /* USER BAR MODERNA E PIÙ GRANDE */
         .user-bar-inline {
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            gap: 14px;
-            padding: 14px 24px;
-            background: rgba(255,255,255,0.12);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 20px;
-            margin-bottom: 18px;
+            gap: 10px;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 16px;
+            margin-bottom: 15px;
             flex-wrap: wrap;
             color: white;
-            font-size: 1em;
-            border: 1px solid rgba(255,255,255,0.08);
-            min-height: 60px;
+            font-size: 0.85em;
         }
-        
         .user-bar-inline .username {
-            font-weight: 700;
+            font-weight: 600;
             margin-right: auto;
-            font-size: 1.05em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size: 0.9em;
         }
-        
-        .user-bar-inline .username i {
-            font-size: 1.3em;
-            color: #2ecc71;
-        }
-        
         .user-bar-inline .badge {
             background: rgba(255,255,255,0.2);
-            padding: 6px 16px;
-            border-radius: 30px;
-            font-size: 0.85em;
-            font-weight: 600;
-            letter-spacing: 0.3px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.7em;
         }
-        
         .user-bar-inline button {
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.15);
+            border: none;
             color: white;
-            padding: 10px 22px;
-            border-radius: 30px;
+            padding: 8px 18px;
+            border-radius: 20px;
             cursor: pointer;
-            font-size: 0.9em;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            min-height: 42px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .user-bar-inline button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-        }
-        
-        .user-bar-inline .admin-btn {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-            border: none;
-            box-shadow: 0 2px 12px rgba(243, 156, 18, 0.3);
-        }
-        
-        .user-bar-inline .admin-btn:hover {
-            box-shadow: 0 4px 20px rgba(243, 156, 18, 0.4);
-            transform: translateY(-2px);
-        }
-        
-        .user-bar-inline .logout-btn {
-            background: rgba(231, 76, 60, 0.8);
-            border: none;
-        }
-        
-        .user-bar-inline .logout-btn:hover {
-            background: #e74c3c;
-            box-shadow: 0 4px 20px rgba(231, 76, 60, 0.3);
-        }
-        
-        .user-bar-inline .badge[style*="background: rgb(243, 156, 18)"] {
-            background: linear-gradient(135deg, #f39c12, #e67e22) !important;
-            box-shadow: 0 2px 12px rgba(243, 156, 18, 0.3);
-            padding: 6px 18px;
+            font-size: 0.75em;
+            transition: all 0.3s;
+            min-height: 32px;
             font-weight: 700;
-            letter-spacing: 0.5px;
+        }
+        .user-bar-inline button:hover { background: rgba(255,255,255,0.25); }
+        .user-bar-inline .admin-btn { background: #f39c12; }
+        .user-bar-inline .admin-btn:hover { background: #e67e22; }
+        .user-bar-inline .logout-btn { background: #e74c3c; }
+        .user-bar-inline .logout-btn:hover { background: #c0392b; }
+        
+        @media (max-width: 768px) {
+            .user-bar-inline { padding: 6px 12px; gap: 6px; font-size: 0.75em; border-radius: 12px; }
+            .user-bar-inline .username { font-size: 0.75em; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            .user-bar-inline .badge { font-size: 0.6em; padding: 1px 6px; }
+            .user-bar-inline button { padding: 4px 8px; font-size: 0.65em; min-height: 26px; min-width: 30px; }
+            .campionato-title-wrapper .title { font-size: 1.4em; }
+        }
+        @media (max-width: 400px) {
+            .user-bar-inline .username { max-width: 50px; font-size: 0.65em; }
+            .user-bar-inline .badge { display: none; }
+            .user-bar-inline button { padding: 3px 6px; font-size: 0.55em; min-height: 22px; }
+            .campionato-title-wrapper .title { font-size: 1.2em; }
         }
         
-        /* TABS */
         .tabs { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; justify-content: center; }
         .tab-btn { padding: 14px 28px; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); border: none; color: white; font-size: 1.1em; cursor: pointer; border-radius: 16px; font-weight: 600; transition: all 0.3s; display: flex; align-items: center; gap: 8px; }
         .tab-btn:hover { background: rgba(0,0,0,0.6); transform: translateY(-2px); }
         .tab-btn.active { background: linear-gradient(135deg, #2ecc71, #27ae60); box-shadow: 0 4px 20px rgba(46,204,113,0.3); }
-        
-        /* PANELS */
         .panel { display: none; background: rgba(255,255,255,0.98); border-radius: 24px; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.1); animation: fadeIn 0.4s ease; font-size: 1.1em; }
         .panel.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
         .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50; font-size: 1em; }
         input, select { width: 100%; padding: 14px 18px; border: 2px solid #dce4ec; border-radius: 12px; font-size: 1.1em; transition: all 0.3s; font-family: 'Inter', sans-serif; }
         input:focus, select:focus { outline: none; border-color: #2ecc71; box-shadow: 0 0 0 3px rgba(46,204,113,0.1); }
         input[type="color"] { padding: 4px; height: 50px; cursor: pointer; }
-        
-        button {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 16px;
-            cursor: pointer;
-            font-size: 1.1em;
-            font-weight: 700;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            letter-spacing: 0.3px;
-        }
+        button { background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; border: none; padding: 14px 28px; border-radius: 16px; cursor: pointer; font-size: 1.1em; font-weight: 700; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.3px; }
         button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(46,204,113,0.4); }
         button:disabled { opacity: 0.4; transform: none; cursor: not-allowed; box-shadow: none; }
-        
         .checkbox-wrapper { display: flex; align-items: center; gap: 10px; margin: 15px 0; padding: 5px 0; }
         .checkbox-wrapper input { width: 20px; height: 20px; margin: 0; cursor: pointer; accent-color: #2ecc71; }
-        
         .players-grid, .matches-list { display: grid; gap: 15px; margin-top: 20px; }
-        
         .player-card { background: #ffffff; padding: 15px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border: 1px solid #e0e8f0; transition: all 0.3s; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
         .player-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); border-color: #2ecc71; }
         
@@ -275,47 +153,11 @@
         .player-stats span { display: inline-flex; align-items: center; gap: 5px; }
         .jersey-icon { color: #2c3e50; }
         
-        /* Guanto rosso - ora con immagine personalizzata */
-        .glove-icon {
-            width: 20px;
-            height: 20px;
-            vertical-align: middle;
-            display: inline-block;
-            object-fit: contain;
-        }
+        /* Guanto rosso */
+        .glove-icon { color: #e74c3c; }
         
-        .gk-badge {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75em;
-            font-weight: 700;
-            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .gk-badge .glove-icon {
-            width: 14px;
-            height: 14px;
-        }
-        
-        /* MATCH CARD */
-        .match-card {
-            background: linear-gradient(135deg, #ffffff, #f8fafc);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            border: 1px solid rgba(46,204,113,0.1);
-        }
-        .match-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-        }
+        .match-card { background: #e8f5e9; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: all 0.3s; border: 1px solid #c8e6c9; }
+        .match-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); border-color: #2ecc71; }
         
         .match-header {
             display: flex;
@@ -358,12 +200,9 @@
             text-align: center;
             margin: 0 5px;
         }
-        
         .match-actions {
             display: flex;
             gap: 5px;
-            flex-wrap: wrap;
-            align-items: center;
         }
         .match-actions button { 
             background: none; 
@@ -373,37 +212,6 @@
             font-size: 0.9em;
         }
         .match-actions button:hover { background: none; color: #2ecc71; transform: none; box-shadow: none; }
-        
-        .match-actions .mvp-badge {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75em;
-            font-weight: 700;
-            box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .match-actions .gk-badge {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75em;
-            font-weight: 700;
-            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .match-actions .gk-badge .glove-icon {
-            width: 14px;
-            height: 14px;
-        }
         
         .match-detail-box { margin-top: 12px; padding: 10px; background: #f8fafc; border-radius: 12px; }
         .match-goals-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
@@ -430,7 +238,6 @@
         .ranking-box { background: #ffffff; border-radius: 20px; padding: 20px; border-top: 5px solid #2ecc71; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: all 0.3s; overflow-x: auto; border: 1px solid #e0e8f0; }
         .ranking-box:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
         .ranking-box h3 { color: #2ecc71; margin-bottom: 20px; text-align: center; font-size: 1.3em; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        
         .ranking-table { width: 100%; border-collapse: collapse; font-size: 1em; min-width: 450px; }
         .ranking-table th, .ranking-table td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #e9ecef; }
         .ranking-table th { background: #2ecc71; color: white; font-weight: 700; }
@@ -447,21 +254,6 @@
         .stat-number { font-size: 2.5em; font-weight: 800; word-break: break-word; }
         .stat-label { font-size: 1em; opacity: 0.9; margin-top: 8px; display: block; }
         .stat-small { font-size: 0.7em; opacity: 0.8; margin-top: 5px; }
-        
-        /* SPAZIATURE PER IL PANNELLO PARTITE */
-        #newMatchFormContainer {
-            margin-bottom: 30px;
-        }
-        
-        #newMatchFormContainer h2 {
-            margin-bottom: 25px;
-        }
-        
-        .matches-title {
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 2px solid rgba(46,204,113,0.15);
-        }
         
         .modal, .summary-modal, .alert-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content, .summary-content, .alert-content { background: white; border-radius: 24px; padding: 25px; max-width: 90%; max-height: 90%; overflow: auto; width: 650px; animation: fadeIn 0.3s ease; }
@@ -503,8 +295,16 @@
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 3000; display: flex; justify-content: center; align-items: center; color: white; font-size: 1.2em; display: none; }
         .loading-overlay i { font-size: 2em; margin-right: 10px; }
         
+        /* Crop modal per logo */
         #cropLogoModal .modal-content { max-width: 500px; }
         #cropLogoImage { max-width: 100%; max-height: 50vh; }
+        
+        /* Spazio prima di "Partite Registrate" */
+        .matches-title {
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 2px solid rgba(46,204,113,0.2);
+        }
         
         @media (max-width: 768px) { 
             .rankings-container { grid-template-columns: 1fr; } 
@@ -529,32 +329,6 @@
             .match-teams .team-name img { width: 24px; height: 24px; }
             .player-avatar { width: 40px; height: 40px; }
             .ranking-avatar { width: 35px; height: 35px; }
-            
-            .user-bar-inline { 
-                padding: 12px 16px; 
-                gap: 8px; 
-                font-size: 0.85em; 
-                border-radius: 16px; 
-                min-height: 52px;
-                flex-wrap: wrap;
-            }
-            .user-bar-inline .username { 
-                font-size: 0.9em; 
-                max-width: 100px; 
-                overflow: hidden; 
-                text-overflow: ellipsis; 
-                white-space: nowrap; 
-            }
-            .user-bar-inline .badge { 
-                font-size: 0.7em; 
-                padding: 4px 12px; 
-            }
-            .user-bar-inline button { 
-                padding: 6px 14px; 
-                font-size: 0.75em; 
-                min-height: 34px; 
-                min-width: 36px;
-            }
         }
         
         @media (max-width: 400px) {
@@ -567,25 +341,6 @@
             .campionato-title-wrapper .title { font-size: 1em; }
             .player-avatar { width: 35px; height: 35px; }
             .ranking-avatar { width: 28px; height: 28px; }
-            
-            .user-bar-inline {
-                padding: 10px 12px;
-                gap: 6px;
-                border-radius: 12px;
-                min-height: 46px;
-            }
-            .user-bar-inline .username { 
-                max-width: 70px; 
-                font-size: 0.8em; 
-            }
-            .user-bar-inline .badge { 
-                display: none; 
-            }
-            .user-bar-inline button { 
-                padding: 4px 10px; 
-                font-size: 0.65em; 
-                min-height: 28px; 
-            }
         }
     </style>
 </head>
@@ -644,7 +399,7 @@
         <!-- Main App -->
         <div id="mainApp" class="main-app">
             
-            <!-- BARRA UTENTE MODERNA -->
+            <!-- BARRA UTENTE -->
             <div id="userBarInline" class="user-bar-inline" style="display: none;">
                 <span class="username"><i class="fas fa-user-circle"></i> <span id="currentUsernameInline"></span></span>
                 <span id="roleBadgeInline" class="badge">👁️ Solo Lettura</span>
@@ -677,14 +432,13 @@
 
             <div id="partite" class="panel active">
                 <div class="settings-bar"><button onclick="showNewMatchForm()" id="newMatchBtn"><i class="fas fa-plus-circle"></i> Nuova Partita</button><label><i class="fas fa-users"></i> Giocatori per squadra:</label><input type="number" id="playersPerTeamSetting" min="1" max="22" value="5" step="1" style="width:80px;" onchange="updatePlayersPerTeam()"></div>
-                <div id="newMatchFormContainer" style="display:none;">
-                    <h2><i class="fas fa-pen-alt"></i> Nuova Partita</h2>
+                <div id="newMatchFormContainer" style="display:none;"><h2><i class="fas fa-pen-alt"></i> Nuova Partita</h2>
                     <div class="team-container"><div class="team-title"><img id="teamALogoForm" src="" style="display:none;"> <span id="teamANameForm" style="color:#000000;">Squadra A</span> <span id="goalsACountNew" class="goal-count">0 goal</span></div><div id="teamASelectors" class="players-selector"></div></div>
                     <div class="team-container"><div class="team-title"><img id="teamBLogoForm" src="" style="display:none;"> <span id="teamBNameForm" style="color:#000000;">Squadra B</span> <span id="goalsBCountNew" class="goal-count">0 goal</span></div><div id="teamBSelectors" class="players-selector"></div></div>
                     <div class="team-container"><div class="team-title"><i class="fas fa-futbol"></i> Goal <span id="teamANameGoalsA" style="color:#000000;">Squadra A</span></div><div id="goalsAContainer"></div><button type="button" class="add-goal-player-btn" onclick="addGoalPlayer('A')"><i class="fas fa-plus"></i> Aggiungi marcatore</button></div>
                     <div class="team-container"><div class="team-title"><i class="fas fa-futbol"></i> Goal <span id="teamANameGoalsB" style="color:#000000;">Squadra B</span></div><div id="goalsBContainer"></div><button type="button" class="add-goal-player-btn" onclick="addGoalPlayer('B')"><i class="fas fa-plus"></i> Aggiungi marcatore</button></div>
                     <div class="form-group"><label><i class="fas fa-star"></i> Miglior Giocatore (MVP)</label><select id="mvp"><option value="">Seleziona MVP</option></select></div>
-                    <div class="form-group"><label id="bestGoalkeeperLabel">Miglior Portiere</label><select id="bestGoalkeeper"><option value="">Seleziona</option></select></div>
+                    <div class="form-group"><label><i class="fas fa-glove glove-icon"></i> Miglior Portiere</label><select id="bestGoalkeeper"><option value="">Seleziona</option></select></div>
                     <div class="form-group"><label><i class="fas fa-calendar"></i> Data</label><input type="date" id="matchDate"></div>
                     <div style="display:flex; gap:10px;"><button id="saveMatchBtn" style="flex:1;"><i class="fas fa-save"></i> Registra Partita</button><button onclick="hideNewMatchForm()" style="background:#95a5a6;flex:1;"><i class="fas fa-times"></i> Annulla</button></div>
                 </div>
@@ -763,7 +517,7 @@
                     </div>
                     <div class="checkbox-wrapper">
                         <input type="checkbox" id="isGoalkeeper">
-                        <label for="isGoalkeeper" id="goalkeeperLabel">Portiere</label>
+                        <label for="isGoalkeeper"><i class="fas fa-glove glove-icon"></i> Portiere</label>
                     </div>
                     <button type="submit" id="addPlayerBtn"><i class="fas fa-plus"></i> Aggiungi Giocatore</button>
                 </form>
@@ -778,21 +532,16 @@
                     <div class="ranking-box"><h3>📊 Classifica Generale Giocatori</h3><div id="generalRanking"></div></div>
                     <div class="ranking-box"><h3>⚽ Capocannonieri</h3><div id="topScorersRanking"></div></div>
                     <div class="ranking-box"><h3>🎯 Assist</h3><div id="assistsRanking"></div></div>
-                    <div class="ranking-box"><h3 id="goalkeepersStatsTitle">Classifica Portieri (media gol subiti)</h3><div id="goalkeepersStatsRanking"></div></div>
+                    <div class="ranking-box"><h3>🧤 Classifica Portieri (media gol subiti)</h3><div id="goalkeepersStatsRanking"></div></div>
                     <div class="ranking-box"><h3>⭐ Miglior Giocatore (MVP)</h3><div id="mvpRanking"></div></div>
-                    <div class="ranking-box"><h3 id="bestGoalkeeperRankingTitle">Premio Miglior Portiere</h3><div id="bestGoalkeeperRanking"></div></div>
+                    <div class="ranking-box"><h3>🏅 Premio Miglior Portiere</h3><div id="bestGoalkeeperRanking"></div></div>
                 </div>
             </div>
 
             <div id="statistiche" class="panel">
                 <h2><i class="fas fa-chart-pie"></i> Statistiche Generali</h2><div id="generalStats" class="stats-grid"></div>
                 <h2 style="margin-top:30px; margin-bottom:15px; color:#2ecc71; border-bottom:2px solid #2ecc71; padding-bottom:5px;"><i class="fas fa-award"></i> Premi Speciali</h2>
-                <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-number" id="bestScorer">---</div><div class="stat-label">⚽ Miglior Marcatore</div><div class="stat-small" id="bestScorerCount"></div></div>
-                    <div class="stat-card"><div class="stat-number" id="bestAssist">---</div><div class="stat-label">🎯 Miglior Assistman</div><div class="stat-small" id="bestAssistCount"></div></div>
-                    <div class="stat-card"><div class="stat-number" id="bestMVP">---</div><div class="stat-label">⭐ Miglior MVP</div><div class="stat-small" id="bestMVPCount"></div></div>
-                    <div class="stat-card"><div class="stat-number" id="bestGK">---</div><div class="stat-label" id="bestGKLabel">Miglior Portiere</div><div class="stat-small" id="bestGKCount"></div></div>
-                </div>
+                <div class="stats-grid"><div class="stat-card"><div class="stat-number" id="bestScorer">---</div><div class="stat-label">⚽ Miglior Marcatore</div><div class="stat-small" id="bestScorerCount"></div></div><div class="stat-card"><div class="stat-number" id="bestAssist">---</div><div class="stat-label">🎯 Miglior Assistman</div><div class="stat-small" id="bestAssistCount"></div></div><div class="stat-card"><div class="stat-number" id="bestMVP">---</div><div class="stat-label">⭐ Miglior MVP</div><div class="stat-small" id="bestMVPCount"></div></div><div class="stat-card"><div class="stat-number" id="bestGK">---</div><div class="stat-label">🧤 Miglior Portiere</div><div class="stat-small" id="bestGKCount"></div></div></div>
             </div>
 
             <div id="impostazioni" class="panel">
@@ -842,14 +591,6 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
         
-        // ========== ICONA GUANTO CENTRALIZZATA ==========
-        const GLOVE_ICON = "data:image/webp;base64,UklGRjIHAABXRUJQVlA4WAoAAAAQAAAAPwAAMwAAQUxQSEYCAAABkARtmyFJf2R0jLG2bdu2bdu2cdqTbdu2rbFtGxUVFf+hM7P+3OExIiYA5Et9RnTrAQp7IOJ1F6BnVxERc1rRNcpARLzPSFi1ejZQD7mXAdrsu7zMRcZhzvn9PQDOIrcR2DSoYzFR5yNiUJ9+PDdYoyOiTxVRBTdExJ3wlzeggx/i70ZSNh6IiBlfeT4NdLR+KrqL1kYrL96iHETEAAeZPigfsg65RgVeKY2DOwN4F5E7RGaCiZjTPGzEa4D8yxG8r7xZMp1MoC6oxKsg+JzEE/YSMAblNBPCHBeeUwYvS5czKoGFAbBVMeg2LIkmysJjETyzWfPcMGIN24AKPUD4m4a/LkXFU9FDFSmo8rzotAq1u0W7VUSkqVgmWqLi4DgVI0SjVAyrp6KLqJsCzYX9VFBDVEPBe4CddHoZsFSpxACglEa3BaATXYLNhABEr6MTbGwS6NoB2CSRhUwykPveJYgswQYA7pL5hKHwuBvZTQCAeWT/5TyrOnnIqGXF/PKOH7OC43nnIHCH5Z1+PKe0vJLmxIOAvBIAwrd55a3oYl45L9qkIiZJxTrREAU5HTqkKRgmqqSTpbQD6JFFplUTgRtVVjcAgGEa1V+Q3EukLQDuNINot0wTg8SYB8I1NEYzGXhJcpCJ2HGStyDdi+KnHUja/aboI2cTRzAMpIcQpNjILcgi2Cm3jUBbIsVikPC13HMCjGNSCXkhyVLc8VJZApOByxQ35S5SXAZpts2cXkfOJcPcGiYHgzxMv3eQY089THeD/BJWUDggxgQAADAcAJ0BKkAANAA+bS6UR6QiIiEoFAtQgA2JbA2FfmF/0vgAFAA/AD9AEEeQLsz5frkDvx6s/6BmVvgDc7Nkr9Gb/HfwDWK+d3/Umn7Pwvhb4jvNXtJ6YVZpfp/Wv4f+0f5VfBH+O3S39U3gjIn+T76f+j4yT+3+RB/buJl/fPQK/Zv6j/Y/Vt8w/531L/7p/VPZu6kT9dDN6KSzdsB4gSwooJ0g8eE0C9gugbKD0/+qbEo6UnjvqYLxhaVaRqsU94lflIC/RbppzAB+vmIrONpuN/rW7QuDU0Rge9Y4+OcuIstGXiphvwvuAAD++RML/3FDCSi4VHPUK9HqPHPcDhWA/Hgwi+DXDQj4RP9wyR4EV22KfwNNuTb6zFQfP2lS+WRR/94se4JSY0mZRyN7Klayn5qgteauhSqY0v4VDYLHYYEBSLR05sRrUEJrM6Jb9tbZz/i80hbvKn/lXjClOMaF75q+ZX4N4Ob8LoSY3W1kvfZ12V+uucBvpm3IPyOW6k1EhMG9tno9vJjM27Hi//3Bgm32ZHDOWwLqqAk/M+C1VtKo3+tIQMzbHyymzlTcKu1amluoWAOvyv8hpO/MrhyZWgu/zv84jXToNdb9mfK/R74gXlTbtoe4Ms4vMOYI5At4AFapiThM+EP+1p5G6EJa0ZEZv33Q1GAva4Qrptxu6anKpybmAx9ptgpYyXCKfIjdKGoWPtHP55Ovyjgnh2dFy+rmshevoWNlxsdOv1Z8C77te1W1Wvp/1Z1Vx09cQX2yjs//nwg/809cLFzFWB/uMObuNHjErNf/vsh4gJdSfZfyx/E209/AnXSMMc9xZaHDTU8mc455k8MZ9KTKwXMRIPE17iHqGfruHUdRRZ6Hm6ImVwBwNMRuwAqYTZMBc2AWEHuzcUJLmECfv/4GL3d/FoZi2LFtA+SUqg7WYyKdNtOi4nyr6UNutxiu6jF0WRYNwMy+i6G+4CWoqUgzVUOj4UHkpJyqdEs9Jbsw4tBBIt9K3pLke8nbMfx8bxsZcug/gl22Z7a1PHBfWZVR4L+mnj7jm6KP5oIdvdiKXYLm/i1GQTna6cEck9tKU7yppKPdCtFZmPqqhqF1wbwGAU1JmBQe7m9KDS5ZiB5fzg0Cv/joAcAIk5VN5Zlx7B08r+kzN0Uj3e6pTipmVF93gmIGwlukQAhmF8BnqUdv9Pmi1S2xHaH1zjopvBJNKf9/s3jlPsKRpGi9TGYGzHcQXvpD5KWs428520bqsQMTP22ns/q/xO04a96/z9vU72+f+grGO/bsHP7xHa0ElkQfuBefittwiW4dt6ApL9/Y/tEd72vB8mV7lfj9kElu15pRzFd/Er3n0quOO1KkSdMf0ZyE5URhBnle1uscYPz3jAj/GSAI8Gtj+trrbgBMPen2WPjBfoX5Ahvyhdex1Dek3XIsXexUTEP7zjG8pySD774wJAcrHf0i9yYvPB7QRxgHxv76sg7UcXeiOea0RNeV+M0+yO1l//6ts62AqLA6fOo8zHsZ3p81KZNyg1fmUH35aMe4OP5d/RvDNAvtNUynNat/v95V/f48Z3X7yv/8A1LuDdpf/b+G+Tpf/Uf9bHWH6+Luup5gjYWqoLv0+20XiCalLS0AAAA=";
-
-        // Funzione helper per generare l'HTML del guanto
-        function getGloveHTML(size = 20) {
-            return `<img src="${GLOVE_ICON}" class="glove-icon" style="width:${size}px; height:${size}px; vertical-align:middle; display:inline-block;" alt="Guanto">`;
-        }
-        
         // ========== VARIABILI GLOBALI ==========
         let players = [], matches = [], playersPerTeam = 5, cropper = null, pendingPhoto = null, editingMatchId = null, goalsData = { A: [], B: [] }, seasonName = "Stagione 2024/2025", teamSettings = { 
             nameA: 'Squadra A', logoA: null, nameB: 'Squadra B', logoB: null,
@@ -859,24 +600,6 @@
         let isLoggedIn = false, isAdminMode = false, currentUser = null, currentCampionatoId = null, currentCampionatoNome = null, pendingSaveCallback = null, currentFirebaseUser = null;
         let pendingLogoTeam = null;
         let cropperLogo = null;
-        
-        // Inizializza le etichette con il guanto
-        document.addEventListener('DOMContentLoaded', function() {
-            const gkLabel = document.getElementById('bestGoalkeeperLabel');
-            if (gkLabel) gkLabel.innerHTML = getGloveHTML(18) + ' Miglior Portiere';
-            
-            const gkLabel2 = document.getElementById('goalkeeperLabel');
-            if (gkLabel2) gkLabel2.innerHTML = getGloveHTML(16) + ' Portiere';
-            
-            const gkStatsTitle = document.getElementById('goalkeepersStatsTitle');
-            if (gkStatsTitle) gkStatsTitle.innerHTML = getGloveHTML(18) + ' Classifica Portieri (media gol subiti)';
-            
-            const gkRankingTitle = document.getElementById('bestGoalkeeperRankingTitle');
-            if (gkRankingTitle) gkRankingTitle.innerHTML = getGloveHTML(18) + ' Premio Miglior Portiere';
-            
-            const bestGKLabel = document.getElementById('bestGKLabel');
-            if (bestGKLabel) bestGKLabel.innerHTML = getGloveHTML(18) + ' Miglior Portiere';
-        });
         
         function showLoading(show) { 
             const loader = document.getElementById('loadingOverlay'); 
@@ -1461,14 +1184,14 @@
                 <div class="player-card">
                     ${p.photo ? `<img class="player-avatar" src="${p.photo}">` : `<div class="player-avatar" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2ecc71,#27ae60);color:white;font-size:24px;"><i class="fas fa-user"></i></div>`}
                     <div class="player-info">
-                        <h3><strong>${escapeHtml(p.name)}</strong> <span class="badge"><i class="fas fa-shirt jersey-icon"></i> ${p.number}</span> ${p.isGoalkeeper ? '<span class="badge">' + getGloveHTML(14) + ' Portiere</span>' : '<span class="badge"><i class="fas fa-futbol"></i> Calciatore</span>'}</h3>
+                        <h3><strong>${escapeHtml(p.name)}</strong> <span class="badge"><i class="fas fa-shirt jersey-icon"></i> ${p.number}</span> ${p.isGoalkeeper ? '<span class="badge"><i class="fas fa-glove glove-icon"></i> Portiere</span>' : '<span class="badge"><i class="fas fa-futbol"></i> Calciatore</span>'}</h3>
                         <div class="player-stats">
                             <span><i class="fas fa-futbol"></i> ${p.goalsScored}</span>
                             <span><i class="fas fa-handshake"></i> ${p.assists}</span>
                             <span><i class="fas fa-skull"></i> ${p.ownGoals}</span>
                             <span><i class="fas fa-trophy"></i> ${p.wins}</span>
                             <span><i class="fas fa-star"></i> ${p.mvpAwards}</span>
-                            <span>${getGloveHTML(14)} ${p.bestGoalkeeperAwards}</span>
+                            <span><i class="fas fa-glove glove-icon"></i> ${p.bestGoalkeeperAwards}</span>
                             <span><i class="fas fa-shield-alt"></i> ${p.cleanSheets}</span>
                             <span><i class="fas fa-calendar"></i> ${p.matchesPlayed} partite</span>
                         </div>
@@ -1478,7 +1201,7 @@
             `).join(''); 
         }
         
-        function getTeamPlayersList(teamIds) { if (!teamIds || teamIds.length === 0) return ''; let html = '<div class="team-players-list">'; for (let id of teamIds) { const p = players.find(p => p.id === id); if (p) html += `<span class="player-tag"><i class="fas fa-user"></i> ${escapeHtml(p.name)}${p.isGoalkeeper ? ' ' + getGloveHTML(14) : ''}</span>`; } html += '</div>'; return html; }
+        function getTeamPlayersList(teamIds) { if (!teamIds || teamIds.length === 0) return ''; let html = '<div class="team-players-list">'; for (let id of teamIds) { const p = players.find(p => p.id === id); if (p) html += `<span class="player-tag"><i class="fas fa-user"></i> ${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</span>`; } html += '</div>'; return html; }
         
         function formatGoalsList(goals) { if (!goals || goals.length === 0) return '<span style="color:#999;">Nessun goal</span>'; const counts = {}; for (let g of goals) { const p = players.find(p => p.id === g.playerId); if (p) { const key = `${p.id}_${g.isOwnGoal}`; if (!counts[key]) counts[key] = { name: p.name, count: 0, isOwnGoal: g.isOwnGoal }; counts[key].count++; } } let html = '<div class="match-goals-list">'; for (let g of Object.values(counts)) { if (g.isOwnGoal) html += `<span class="own-goal-badge"><i class="fas fa-futbol"></i> ${escapeHtml(g.name)}: ${g.count} <span style="background:#c0392b;padding:2px 6px;border-radius:12px;">AUTOGOL</span></span>`; else html += `<span class="goal-badge"><i class="fas fa-futbol"></i> ${escapeHtml(g.name)}: ${g.count}</span>`; } html += '</div>'; return html; }
         
@@ -1515,8 +1238,6 @@
                             </span>
                         </div>
                         <div class="match-actions">
-                            ${mvpP ? `<span class="mvp-badge"><i class="fas fa-star"></i> MVP: ${escapeHtml(mvpP.name)}</span>` : ''}
-                            ${bestGk ? `<span class="gk-badge">${getGloveHTML(14)} ${escapeHtml(bestGk.name)}</span>` : ''}
                             <button class="edit-btn" onclick="editMatch(${m.id})" ${!isAdminMode?'disabled':''}><i class="fas fa-edit"></i></button>
                             <button class="delete-match-btn" onclick="deleteMatch(${m.id})" ${!isAdminMode?'disabled':''}><i class="fas fa-trash-alt"></i></button>
                         </div>
@@ -1525,7 +1246,7 @@
                         <div style="display:flex;flex-wrap:wrap;gap:15px;margin-bottom:15px;">
                             <div><i class="fas fa-calendar"></i> <strong>Data:</strong> ${formatDate(m.date)}</div>
                             <div><i class="fas fa-star" style="color:#f39c12;"></i> <strong>MVP:</strong> ${mvpP ? escapeHtml(mvpP.name) : '<span style="color:#999;">Non selezionato</span>'}</div>
-                            <div>${getGloveHTML(16)} <strong>Miglior Portiere:</strong> ${bestGk ? escapeHtml(bestGk.name) : '<span style="color:#999;">Non selezionato</span>'}</div>
+                            <div><i class="fas fa-glove glove-icon"></i> <strong>Miglior Portiere:</strong> ${bestGk ? escapeHtml(bestGk.name) : '<span style="color:#999;">Non selezionato</span>'}</div>
                         </div>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
                             <div>
@@ -1594,10 +1315,6 @@
                 teamBLogoForm.src = teamSettings.logoB;
                 teamBLogoForm.style.display = 'inline-block';
             }
-            
-            // Aggiorna l'etichetta del miglior portiere con il guanto
-            const gkLabel = document.getElementById('bestGoalkeeperLabel');
-            if (gkLabel) gkLabel.innerHTML = getGloveHTML(18) + ' Miglior Portiere';
         }
         
         function updateAll() { updatePlayersList(); updateMatchesList(); updateAllRankings(); }
@@ -1632,12 +1349,21 @@
             const modal = document.getElementById('summaryModal'); 
             const contentDiv = document.getElementById('summaryContent'); 
             if (modal && contentDiv) { 
+                // Applica i colori delle squadre al riepilogo
                 const teamAColor = teamSettings.colorA1 || '#e74c3c';
                 const teamBColor = teamSettings.colorB1 || '#3498db';
                 const teamAName = teamSettings.nameA;
                 const teamBName = teamSettings.nameB;
                 
+                // Sostituisci i placeholder nel content con i colori
                 let coloredContent = content;
+                // Sostituisci gli stili di sfondo dinamici
+                coloredContent = coloredContent.replace(/background:linear-gradient\(135deg, #2ecc71, #27ae60\)/g, `background:${teamAColor}`);
+                coloredContent = coloredContent.replace(/background:#2ecc71/g, `background:${teamAColor}`);
+                // Per la squadra B usa un colore diverso                coloredContent = coloredContent.replace(/background:linear-gradient\(135deg, #2ecc71, #27ae60\)/g, `background:${teamBColor}`);
+                coloredContent = coloredContent.replace(/background:#2ecc71/g, `background:${teamBColor}`);
+                
+                // Applica i colori ai titoli delle squadre nel riepilogo
                 coloredContent = coloredContent.replace(/Squadra A/g, `<span style="color:${teamAColor};font-weight:700;">${teamAName}</span>`);
                 coloredContent = coloredContent.replace(/Squadra B/g, `<span style="color:${teamBColor};font-weight:700;">${teamBName}</span>`);
                 
@@ -1655,18 +1381,18 @@
         // FUNZIONI PARTITA
         function updateGoalCountersNew() { const aCount = goalsData.A.filter(g => g.playerId).length; const bCount = goalsData.B.filter(g => g.playerId).length; const aSpan = document.getElementById('goalsACountNew'); const bSpan = document.getElementById('goalsBCountNew'); if (aSpan) aSpan.innerHTML = `${aCount} goal`; if (bSpan) bSpan.innerHTML = `${bCount} goal`; }
         function hideNewMatchForm() { const container = document.getElementById('newMatchFormContainer'); if (container) container.style.display = 'none'; }
-        function updateMvpAndGkSelectors() { const teamA = getCurrentTeamPlayers('A'); const teamB = getCurrentTeamPlayers('B'); const all = [...teamA, ...teamB]; const field = all.filter(p => !p.isGoalkeeper); const mvpSel = document.getElementById('mvp'); if (mvpSel) mvpSel.innerHTML = '<option value="">Seleziona MVP</option>' + field.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join(''); const gk = all.filter(p => p.isGoalkeeper); const gkSel = document.getElementById('bestGoalkeeper'); if (gkSel) { if (gk.length === 0) gkSel.innerHTML = '<option value="">Seleziona Miglior Portiere</option><option disabled>⚠️ Nessun portiere</option>'; else gkSel.innerHTML = '<option value="">Seleziona Miglior Portiere</option>' + gk.map(p => `<option value="${p.id}">${escapeHtml(p.name)} ${getGloveHTML(14)}</option>`).join(''); } }
+        function updateMvpAndGkSelectors() { const teamA = getCurrentTeamPlayers('A'); const teamB = getCurrentTeamPlayers('B'); const all = [...teamA, ...teamB]; const field = all.filter(p => !p.isGoalkeeper); const mvpSel = document.getElementById('mvp'); if (mvpSel) mvpSel.innerHTML = '<option value="">Seleziona MVP</option>' + field.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join(''); const gk = all.filter(p => p.isGoalkeeper); const gkSel = document.getElementById('bestGoalkeeper'); if (gkSel) { if (gk.length === 0) gkSel.innerHTML = '<option value="">Seleziona Miglior Portiere</option><option disabled>⚠️ Nessun portiere</option>'; else gkSel.innerHTML = '<option value="">Seleziona Miglior Portiere</option>' + gk.map(p => `<option value="${p.id}">${escapeHtml(p.name)} 🧤</option>`).join(''); } }
         function addGoalPlayer(team) { const teamPlayers = getCurrentTeamPlayers(team); if (teamPlayers.length === 0) { showAlert('Seleziona prima i giocatori della squadra!', 'error'); return; } goalsData[team].push({ playerId: null, isOwnGoal: false, assistId: null }); renderGoalsContainer(team); updateGoalCountersNew(); }
         function removeGoalPlayer(team, idx) { goalsData[team].splice(idx, 1); renderGoalsContainer(team); updateGoalCountersNew(); }
         function updateGoalPlayerType(team, idx, val) { goalsData[team][idx].isOwnGoal = val === 'true'; goalsData[team][idx].assistId = null; goalsData[team][idx].playerId = null; renderGoalsContainer(team); updateGoalCountersNew(); }
         function updateGoalPlayerPlayer(team, idx, playerId) { goalsData[team][idx].playerId = playerId ? parseInt(playerId) : null; renderGoalsContainer(team); updateGoalCountersNew(); }
         function updateGoalPlayerAssist(team, idx, assistId) { goalsData[team][idx].assistId = assistId ? parseInt(assistId) : null; }
         function validateGoalsComplete() { let missing = []; goalsData.A.forEach((g, i) => { if (!g.playerId) missing.push(`Squadra A - Goal ${i+1}`); }); goalsData.B.forEach((g, i) => { if (!g.playerId) missing.push(`Squadra B - Goal ${i+1}`); }); return { valid: missing.length === 0, missing }; }
-        function renderGoalsContainer(team) { const container = document.getElementById(`goals${team}Container`); if (!container) return; const teamPlayers = getCurrentTeamPlayers(team); const oppPlayers = team === 'A' ? getCurrentTeamPlayers('B') : getCurrentTeamPlayers('A'); if (goalsData[team].length === 0) { container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;"><i class="fas fa-info-circle"></i> Nessun evento.</p>'; return; } container.innerHTML = goalsData[team].map((g, idx) => { const isOwn = g.isOwnGoal; const avail = isOwn ? oppPlayers : teamPlayers; const availAssist = teamPlayers.filter(p => p.id !== g.playerId); const missing = !g.playerId; return `<div class="goal-player-group"><div class="goal-player-header"><select class="goal-type-select" onchange="updateGoalPlayerType('${team}', ${idx}, this.value)" style="padding:10px;width:130px;"><option value="false" ${!isOwn ? 'selected' : ''}>⚽ Goal</option><option value="true" ${isOwn ? 'selected' : ''}>😵 Autorete</option></select><select onchange="updateGoalPlayerPlayer('${team}', ${idx}, this.value)" style="flex:2;padding:10px; ${missing ? 'border-color:#e74c3c;background:#ffe6e6;' : ''}"><option value="">⚠️ Seleziona</option>${avail.map(p => `<option value="${p.id}" ${g.playerId == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' ' + getGloveHTML(14) : ''}</option>`).join('')}</select>${missing ? '<span style="color:#e74c3c;"><i class="fas fa-exclamation-triangle"></i> Obbligatorio</span>' : ''}</div>${!isOwn ? `<div class="goal-player-header"><select onchange="updateGoalPlayerAssist('${team}', ${idx}, this.value)" style="flex:2;padding:10px;margin-left:142px;"><option value="">Nessun assist</option>${availAssist.map(p => `<option value="${p.id}" ${g.assistId == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' ' + getGloveHTML(14) : ''}</option>`).join('')}</select></div>` : ''}<div class="goal-player-header"><button class="remove-goal-player" onclick="removeGoalPlayer('${team}', ${idx})"><i class="fas fa-trash-alt"></i> Rimuovi</button></div></div>`; }).join(''); }
+        function renderGoalsContainer(team) { const container = document.getElementById(`goals${team}Container`); if (!container) return; const teamPlayers = getCurrentTeamPlayers(team); const oppPlayers = team === 'A' ? getCurrentTeamPlayers('B') : getCurrentTeamPlayers('A'); if (goalsData[team].length === 0) { container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;"><i class="fas fa-info-circle"></i> Nessun evento.</p>'; return; } container.innerHTML = goalsData[team].map((g, idx) => { const isOwn = g.isOwnGoal; const avail = isOwn ? oppPlayers : teamPlayers; const availAssist = teamPlayers.filter(p => p.id !== g.playerId); const missing = !g.playerId; return `<div class="goal-player-group"><div class="goal-player-header"><select class="goal-type-select" onchange="updateGoalPlayerType('${team}', ${idx}, this.value)" style="padding:10px;width:130px;"><option value="false" ${!isOwn ? 'selected' : ''}>⚽ Goal</option><option value="true" ${isOwn ? 'selected' : ''}>😵 Autorete</option></select><select onchange="updateGoalPlayerPlayer('${team}', ${idx}, this.value)" style="flex:2;padding:10px; ${missing ? 'border-color:#e74c3c;background:#ffe6e6;' : ''}"><option value="">⚠️ Seleziona</option>${avail.map(p => `<option value="${p.id}" ${g.playerId == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`).join('')}</select>${missing ? '<span style="color:#e74c3c;"><i class="fas fa-exclamation-triangle"></i> Obbligatorio</span>' : ''}</div>${!isOwn ? `<div class="goal-player-header"><select onchange="updateGoalPlayerAssist('${team}', ${idx}, this.value)" style="flex:2;padding:10px;margin-left:142px;"><option value="">Nessun assist</option>${availAssist.map(p => `<option value="${p.id}" ${g.assistId == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`).join('')}</select></div>` : ''}<div class="goal-player-header"><button class="remove-goal-player" onclick="removeGoalPlayer('${team}', ${idx})"><i class="fas fa-trash-alt"></i> Rimuovi</button></div></div>`; }).join(''); }
         function getCurrentTeamPlayers(team) { const ids = []; for (let i=1; i<=playersPerTeam; i++) { const sel = document.getElementById(`team${team}_${i}`); if (sel && sel.value) ids.push(parseInt(sel.value)); } return players.filter(p => ids.includes(p.id)); }
         function collectGoalsFromData(team) { const goals = []; goalsData[team].forEach(g => { if (g.playerId) goals.push({ playerId: g.playerId, isOwnGoal: g.isOwnGoal, assistId: g.assistId }); }); return goals; }
-        function updateMatchSelectors() { const aContainer = document.getElementById('teamASelectors'); const bContainer = document.getElementById('teamBSelectors'); if (!aContainer || !bContainer) return; const all = getSortedPlayers(); let aHtml = '', bHtml = ''; for (let i=1; i<=playersPerTeam; i++) { aHtml += `<select class="players-select" id="teamA_${i}" required onchange="updateSelectOptions()"><option value="">Giocatore ${i}</option>${all.map(p => `<option value="${p.id}">${escapeHtml(p.name)}${p.isGoalkeeper ? ' ' + getGloveHTML(14) : ''}</option>`).join('')}</select>`; bHtml += `<select class="players-select" id="teamB_${i}" required onchange="updateSelectOptions()"><option value="">Giocatore ${i}</option>${all.map(p => `<option value="${p.id}">${escapeHtml(p.name)}${p.isGoalkeeper ? ' ' + getGloveHTML(14) : ''}</option>`).join('')}</select>`; } aContainer.innerHTML = aHtml; bContainer.innerHTML = bHtml; updateSelectOptions(); }
-        function updateSelectOptions() { const selectedA = []; for (let i=1; i<=playersPerTeam; i++) { const sel = document.getElementById(`teamA_${i}`); if (sel && sel.value) selectedA.push(parseInt(sel.value)); } const selectedB = []; for (let i=1; i<=playersPerTeam; i++) { const sel = document.getElementById(`teamB_${i}`); if (sel && sel.value) selectedB.push(parseInt(sel.value)); } for (let i=1; i<=playersPerTeam; i++) { const selA = document.getElementById(`teamA_${i}`); if (selA) { const cur = selA.value; const exclude = [...selectedA.filter(id => id != cur), ...selectedB]; const avail = players.filter(p => !exclude.includes(p.id)); let opts = '<option value="">Seleziona</option>'; avail.forEach(p => { opts += `<option value="${p.id}" ${cur == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' ' + getGloveHTML(14) : ''}</option>`; }); selA.innerHTML = opts; } const selB = document.getElementById(`teamB_${i}`); if (selB) { const cur = selB.value; const exclude = [...selectedB.filter(id => id != cur), ...selectedA]; const avail = players.filter(p => !exclude.includes(p.id)); let opts = '<option value="">Seleziona</option>'; avail.forEach(p => { opts += `<option value="${p.id}" ${cur == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' ' + getGloveHTML(14) : ''}</option>`; }); selB.innerHTML = opts; } } updateMvpAndGkSelectors(); }
+        function updateMatchSelectors() { const aContainer = document.getElementById('teamASelectors'); const bContainer = document.getElementById('teamBSelectors'); if (!aContainer || !bContainer) return; const all = getSortedPlayers(); let aHtml = '', bHtml = ''; for (let i=1; i<=playersPerTeam; i++) { aHtml += `<select class="players-select" id="teamA_${i}" required onchange="updateSelectOptions()"><option value="">Giocatore ${i}</option>${all.map(p => `<option value="${p.id}">${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`).join('')}</select>`; bHtml += `<select class="players-select" id="teamB_${i}" required onchange="updateSelectOptions()"><option value="">Giocatore ${i}</option>${all.map(p => `<option value="${p.id}">${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`).join('')}</select>`; } aContainer.innerHTML = aHtml; bContainer.innerHTML = bHtml; updateSelectOptions(); }
+        function updateSelectOptions() { const selectedA = []; for (let i=1; i<=playersPerTeam; i++) { const sel = document.getElementById(`teamA_${i}`); if (sel && sel.value) selectedA.push(parseInt(sel.value)); } const selectedB = []; for (let i=1; i<=playersPerTeam; i++) { const sel = document.getElementById(`teamB_${i}`); if (sel && sel.value) selectedB.push(parseInt(sel.value)); } for (let i=1; i<=playersPerTeam; i++) { const selA = document.getElementById(`teamA_${i}`); if (selA) { const cur = selA.value; const exclude = [...selectedA.filter(id => id != cur), ...selectedB]; const avail = players.filter(p => !exclude.includes(p.id)); let opts = '<option value="">Seleziona</option>'; avail.forEach(p => { opts += `<option value="${p.id}" ${cur == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`; }); selA.innerHTML = opts; } const selB = document.getElementById(`teamB_${i}`); if (selB) { const cur = selB.value; const exclude = [...selectedB.filter(id => id != cur), ...selectedA]; const avail = players.filter(p => !exclude.includes(p.id)); let opts = '<option value="">Seleziona</option>'; avail.forEach(p => { opts += `<option value="${p.id}" ${cur == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`; }); selB.innerHTML = opts; } } updateMvpAndGkSelectors(); }
         
         function generateSummaryContent(teamAIds, teamBIds, goalsA, goalsB, mvpId, bestGkId, date) {
             const teamAName = teamSettings.nameA; const teamBName = teamSettings.nameB;
@@ -1674,10 +1400,10 @@
             const teamBColor = teamSettings.colorB1 || '#3498db';
             
             let teamAPlayersHtml = '<div class="summary-team-players">';
-            teamAIds.forEach(id => { const p = players.find(p => p.id === id); if (p) teamAPlayersHtml += `<span class="summary-player-badge A"><i class="fas fa-user"></i> ${escapeHtml(p.name)} ${p.isGoalkeeper ? getGloveHTML(14) : ''}</span>`; });
+            teamAIds.forEach(id => { const p = players.find(p => p.id === id); if (p) teamAPlayersHtml += `<span class="summary-player-badge A"><i class="fas fa-user"></i> ${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</span>`; });
             teamAPlayersHtml += '</div>';
             let teamBPlayersHtml = '<div class="summary-team-players">';
-            teamBIds.forEach(id => { const p = players.find(p => p.id === id); if (p) teamBPlayersHtml += `<span class="summary-player-badge B"><i class="fas fa-user"></i> ${escapeHtml(p.name)} ${p.isGoalkeeper ? getGloveHTML(14) : ''}</span>`; });
+            teamBIds.forEach(id => { const p = players.find(p => p.id === id); if (p) teamBPlayersHtml += `<span class="summary-player-badge B"><i class="fas fa-user"></i> ${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</span>`; });
             teamBPlayersHtml += '</div>';
             
             let goalsAHtml = '<div class="summary-goal-list">';
@@ -1708,7 +1434,7 @@
                         <p><strong><i class="fas fa-trophy"></i> Squadra B:</strong> <span style="color:${teamBColor};font-weight:700;">${escapeHtml(teamBName)}</span></p>
                         ${teamBPlayersHtml}
                         <p><strong><i class="fas fa-star" style="color:#f39c12;"></i> MVP:</strong> ${mvpPlayer ? escapeHtml(mvpPlayer.name) : '<span style="color:#999;">Non selezionato</span>'}</p>
-                        <p><strong>${getGloveHTML(16)} Miglior Portiere:</strong> ${bestGk ? escapeHtml(bestGk.name) : '<span style="color:#999;">Non selezionato</span>'}</p>
+                        <p><strong><i class="fas fa-glove glove-icon"></i> Miglior Portiere:</strong> ${bestGk ? escapeHtml(bestGk.name) : '<span style="color:#999;">Non selezionato</span>'}</p>
                     </div>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
                         <div>
@@ -1816,8 +1542,8 @@
             for (let i = 0; i < playersPerTeam; i++) { 
                 const selectedA = match.teamA[i] || ''; 
                 const selectedB = match.teamB[i] || ''; 
-                teamASelects += `<select class="edit-teamA-select" data-index="${i}" style="width:100%;padding:10px;margin-bottom:8px;border-radius:10px;" onchange="updateEditTeamPlayers()"><option value="">Seleziona</option>${allPlayers.map(p => `<option value="${p.id}" ${selectedA == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? getGloveHTML(14) : ''}</option>`).join('')}</select>`; 
-                teamBSelects += `<select class="edit-teamB-select" data-index="${i}" style="width:100%;padding:10px;margin-bottom:8px;border-radius:10px;" onchange="updateEditTeamPlayers()"><option value="">Seleziona</option>${allPlayers.map(p => `<option value="${p.id}" ${selectedB == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? getGloveHTML(14) : ''}</option>`).join('')}</select>`; 
+                teamASelects += `<select class="edit-teamA-select" data-index="${i}" style="width:100%;padding:10px;margin-bottom:8px;border-radius:10px;" onchange="updateEditTeamPlayers()"><option value="">Seleziona</option>${allPlayers.map(p => `<option value="${p.id}" ${selectedA == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`).join('')}</select>`; 
+                teamBSelects += `<select class="edit-teamB-select" data-index="${i}" style="width:100%;padding:10px;margin-bottom:8px;border-radius:10px;" onchange="updateEditTeamPlayers()"><option value="">Seleziona</option>${allPlayers.map(p => `<option value="${p.id}" ${selectedB == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`).join('')}</select>`; 
             } 
             
             const existingGoalsA = match.goalsDetailA ? match.goalsDetailA.map(g => ({ playerId: g.playerId, isOwnGoal: g.isOwnGoal, assistId: g.assistId })) : []; 
@@ -1858,7 +1584,7 @@
                     <select id="editMvp" style="padding:10px;border-radius:10px;"></select>
                 </div>
                 <div class="form-group">
-                    <label id="editBestGoalkeeperLabel">Miglior Portiere</label>
+                    <label><i class="fas fa-glove glove-icon"></i> Miglior Portiere</label>
                     <select id="editBestGoalkeeper" style="padding:10px;border-radius:10px;"></select>
                 </div>
                 <div class="form-group">
@@ -1866,10 +1592,6 @@
                     <input type="date" id="editDate" value="${match.date}" style="padding:10px;border-radius:10px;">
                 </div>
             `; 
-            
-            // Aggiorna l'etichetta del miglior portiere
-            const editGkLabel = document.getElementById('editBestGoalkeeperLabel');
-            if (editGkLabel) editGkLabel.innerHTML = getGloveHTML(18) + ' Miglior Portiere';
             
             refreshEditGoalsDisplay('A'); 
             refreshEditGoalsDisplay('B'); 
@@ -1886,7 +1608,7 @@
                 const gkSelect = document.getElementById('editBestGoalkeeper'); 
                 if (gkSelect) { 
                     if (goalkeepers.length === 0) gkSelect.innerHTML = '<option value="">Seleziona Miglior Portiere</option><option value="" disabled>⚠️ Nessun portiere in campo</option>'; 
-                    else gkSelect.innerHTML = '<option value="">Seleziona Miglior Portiere</option>' + goalkeepers.map(p => `<option value="${p.id}" ${match.bestGoalkeeper === p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${getGloveHTML(14)}</option>`).join(''); 
+                    else gkSelect.innerHTML = '<option value="">Seleziona Miglior Portiere</option>' + goalkeepers.map(p => `<option value="${p.id}" ${match.bestGoalkeeper === p.id ? 'selected' : ''}>${escapeHtml(p.name)} 🧤</option>`).join(''); 
                 } 
             }, 50); 
             
@@ -1910,7 +1632,7 @@
                     const availablePlayers = players.filter(p => !excludeIds.includes(p.id)); 
                     let options = '<option value="">Seleziona giocatore</option>'; 
                     availablePlayers.forEach(p => { 
-                        options += `<option value="${p.id}" ${currentValue == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? getGloveHTML(14) : ''}</option>`; 
+                        options += `<option value="${p.id}" ${currentValue == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`; 
                     }); 
                     selectA.innerHTML = options; 
                 } 
@@ -1923,7 +1645,7 @@
                     const availablePlayers = players.filter(p => !excludeIds.includes(p.id)); 
                     let options = '<option value="">Seleziona giocatore</option>'; 
                     availablePlayers.forEach(p => { 
-                        options += `<option value="${p.id}" ${currentValue == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? getGloveHTML(14) : ''}</option>`; 
+                        options += `<option value="${p.id}" ${currentValue == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`; 
                     }); 
                     selectB.innerHTML = options; 
                 } 
@@ -1989,7 +1711,7 @@
             if (gkSelect && (!gkStillValid && currentGk)) gkSelect.value = ''; 
             if (gkSelect) { 
                 if (goalkeepers.length === 0) gkSelect.innerHTML = '<option value="">Seleziona Miglior Portiere</option><option value="" disabled>⚠️ Nessun portiere in campo</option>'; 
-                else gkSelect.innerHTML = '<option value="">Seleziona Miglior Portiere</option>' + goalkeepers.map(p => `<option value="${p.id}" ${(gkStillValid && currentGk == p.id) ? 'selected' : ''}>${escapeHtml(p.name)} ${getGloveHTML(14)}</option>`).join(''); 
+                else gkSelect.innerHTML = '<option value="">Seleziona Miglior Portiere</option>' + goalkeepers.map(p => `<option value="${p.id}" ${(gkStillValid && currentGk == p.id) ? 'selected' : ''}>${escapeHtml(p.name)} 🧤</option>`).join(''); 
             } 
             refreshEditGoalsDisplay('A'); 
             refreshEditGoalsDisplay('B'); 
@@ -2069,14 +1791,14 @@
                             </select>
                             <select onchange="updateEditGoalPlayerPlayer('${team}', ${idx}, this.value)" style="flex:2;padding:10px; ${hasMissingPlayer ? 'border-color:#e74c3c; background-color:#ffe6e6;' : ''}">
                                 <option value="">⚠️ Seleziona giocatore</option>
-                                ${availablePlayers.map(p => `<option value="${p.id}" ${g.playerId == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? getGloveHTML(14) : ''}</option>`).join('')}
+                                ${availablePlayers.map(p => `<option value="${p.id}" ${g.playerId == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`).join('')}
                             </select>
                             ${hasMissingPlayer ? '<span style="color:#e74c3c; font-size:0.7rem;"><i class="fas fa-exclamation-triangle"></i> Obbligatorio</span>' : ''}
                         </div>
                         ${!isOwnGoal ? `<div class="goal-player-header">
                             <select onchange="updateEditGoalPlayerAssist('${team}', ${idx}, this.value)" style="flex:2;padding:10px; margin-left:142px;">
                                 <option value="">Nessun assist</option>
-                                ${availableForAssist.map(p => `<option value="${p.id}" ${g.assistId == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? getGloveHTML(14) : ''}</option>`).join('')}
+                                ${availableForAssist.map(p => `<option value="${p.id}" ${g.assistId == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`).join('')}
                             </select>
                         </div>` : ''}
                         <div class="goal-player-header">
@@ -2260,7 +1982,7 @@
             for (let i=0; i<withGoals.length; i++) {
                 const p = withGoals[i]; const media = p.matchesPlayed > 0 ? (p.goalsScored / p.matchesPlayed).toFixed(2) : '0.00';
                 const avatarHtml = getPlayerAvatarHtml(p, 45);
-                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' ' + getGloveHTML(14):''}</div></td><td><strong>${p.goalsScored}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' 🧤':''}</div></td><td><strong>${p.goalsScored}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
             }
             html += '</tbody></table>'; container.innerHTML = html;
         }
@@ -2273,7 +1995,7 @@
             for (let i=0; i<withAssists.length; i++) {
                 const p = withAssists[i]; const media = p.matchesPlayed > 0 ? (p.assists / p.matchesPlayed).toFixed(2) : '0.00';
                 const avatarHtml = getPlayerAvatarHtml(p, 45);
-                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' ' + getGloveHTML(14):''}</div></td><td><strong>${p.assists}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' 🧤':''}</div></td><td><strong>${p.assists}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
             }
             html += '</tbody></table>'; container.innerHTML = html;
         }
@@ -2286,7 +2008,7 @@
             for (let i=0; i<withMvp.length; i++) {
                 const p = withMvp[i]; const media = p.matchesPlayed > 0 ? (p.mvpAwards / p.matchesPlayed).toFixed(2) : '0.00';
                 const avatarHtml = getPlayerAvatarHtml(p, 45);
-                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' ' + getGloveHTML(14):''}</div></td><td><strong>${p.mvpAwards}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' 🧤':''}</div></td><td><strong>${p.mvpAwards}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
             }
             html += '</tbody></table>'; container.innerHTML = html;
         }
@@ -2299,7 +2021,7 @@
             for (let i=0; i<gks.length; i++) {
                 const p = gks[i]; const media = (p.goalsConceded / p.matchesAsGoalkeeper).toFixed(2);
                 const avatarHtml = getPlayerAvatarHtml(p, 45);
-                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong> ${getGloveHTML(14)}</div></td><td>${p.matchesAsGoalkeeper}</td><td>${p.goalsConceded}</td><td>${media}</td><td>${p.cleanSheets}</td></tr>`;
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong> 🧤</div></td><td>${p.matchesAsGoalkeeper}</td><td>${p.goalsConceded}</td><td>${media}</td><td>${p.cleanSheets}</td></tr>`;
             }
             html += '</tbody></table>'; container.innerHTML = html;
         }
@@ -2312,7 +2034,7 @@
             for (let i=0; i<withAwards.length; i++) {
                 const p = withAwards[i]; const media = p.matchesPlayed > 0 ? (p.bestGoalkeeperAwards / p.matchesPlayed).toFixed(2) : '0.00';
                 const avatarHtml = getPlayerAvatarHtml(p, 45);
-                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong> ${getGloveHTML(14)}</div></td><td><strong>${p.bestGoalkeeperAwards}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong> 🧤</div></td><td><strong>${p.bestGoalkeeperAwards}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
             }
             html += '</tbody></table>'; container.innerHTML = html;
         }
@@ -2325,7 +2047,7 @@
             for (let i=0; i<withPoints.length; i++) {
                 const p = withPoints[i].player; const points = withPoints[i].points; const diff = p.goalsScored - p.goalsConceded;
                 const avatarHtml = getPlayerAvatarHtml(p, 45);
-                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' ' + getGloveHTML(14):''}</div></td><td><strong>${points}</strong></td><td>${p.matchesPlayed}</td><td>${p.wins}</td><td>${p.draws}</td><td>${p.losses}</td><td>${p.goalsScored}</td><td>${p.goalsConceded}</td><td>${diff}</td></tr>`;
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' 🧤':''}</div></td><td><strong>${points}</strong></td><td>${p.matchesPlayed}</td><td>${p.wins}</td><td>${p.draws}</td><td>${p.losses}</td><td>${p.goalsScored}</td><td>${p.goalsConceded}</td><td>${diff}</td></tr>`;
             }
             html += '</tbody></table>'; container.innerHTML = html;
         }
@@ -2401,24 +2123,6 @@
         document.getElementById('adminModalCloseBtn')?.addEventListener('click', closeAdminModal);
         
         async function init() {
-            // Inizializza le etichette con il guanto dopo il caricamento del DOM
-            setTimeout(() => {
-                const gkLabel = document.getElementById('bestGoalkeeperLabel');
-                if (gkLabel) gkLabel.innerHTML = getGloveHTML(18) + ' Miglior Portiere';
-                
-                const gkLabel2 = document.getElementById('goalkeeperLabel');
-                if (gkLabel2) gkLabel2.innerHTML = getGloveHTML(16) + ' Portiere';
-                
-                const gkStatsTitle = document.getElementById('goalkeepersStatsTitle');
-                if (gkStatsTitle) gkStatsTitle.innerHTML = getGloveHTML(18) + ' Classifica Portieri (media gol subiti)';
-                
-                const gkRankingTitle = document.getElementById('bestGoalkeeperRankingTitle');
-                if (gkRankingTitle) gkRankingTitle.innerHTML = getGloveHTML(18) + ' Premio Miglior Portiere';
-                
-                const bestGKLabel = document.getElementById('bestGKLabel');
-                if (bestGKLabel) bestGKLabel.innerHTML = getGloveHTML(18) + ' Miglior Portiere';
-            }, 100);
-            
             const saved = localStorage.getItem('currentUser');
             if (saved) {
                 try {
