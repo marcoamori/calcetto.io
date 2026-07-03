@@ -144,11 +144,16 @@
         .players-grid, .matches-list { display: grid; gap: 15px; margin-top: 20px; }
         .player-card { background: #ffffff; padding: 15px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border: 1px solid #e0e8f0; transition: all 0.3s; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
         .player-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); border-color: #2ecc71; }
+        
         .player-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #2ecc71; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .ranking-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #2ecc71; vertical-align: middle; margin-right: 10px; }
+        
         .player-info h3 { font-size: 1.3em; margin-bottom: 5px; color: #2c3e50; }
         .player-stats { font-size: 1em; color: #7f8c8d; display: flex; gap: 15px; flex-wrap: wrap; }
         .player-stats span { display: inline-flex; align-items: center; gap: 5px; }
         .jersey-icon { color: #2c3e50; }
+        
+        /* Guanto rosso */
         .glove-icon { color: #e74c3c; }
         
         .match-card { background: #e8f5e9; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: all 0.3s; border: 1px solid #c8e6c9; }
@@ -296,8 +301,8 @@
         
         /* Spazio prima di "Partite Registrate" */
         .matches-title {
-            margin-top: 30px;
-            padding-top: 10px;
+            margin-top: 40px;
+            padding-top: 15px;
             border-top: 2px solid rgba(46,204,113,0.2);
         }
         
@@ -322,6 +327,8 @@
             .match-teams { font-size: 1.1em; }
             .match-teams .match-score-center { font-size: 1.1em; padding: 3px 12px; min-width: 55px; }
             .match-teams .team-name img { width: 24px; height: 24px; }
+            .player-avatar { width: 40px; height: 40px; }
+            .ranking-avatar { width: 35px; height: 35px; }
         }
         
         @media (max-width: 400px) {
@@ -332,9 +339,8 @@
             body { font-size: 14px; }
             .match-teams .team-name img { width: 20px; height: 20px; }
             .campionato-title-wrapper .title { font-size: 1em; }
-            i.fa-hand-paper {
-    color: #e74c3c !important;
-}
+            .player-avatar { width: 35px; height: 35px; }
+            .ranking-avatar { width: 28px; height: 28px; }
         }
     </style>
 </head>
@@ -432,7 +438,7 @@
                     <div class="team-container"><div class="team-title"><i class="fas fa-futbol"></i> Goal <span id="teamANameGoalsA" style="color:#000000;">Squadra A</span></div><div id="goalsAContainer"></div><button type="button" class="add-goal-player-btn" onclick="addGoalPlayer('A')"><i class="fas fa-plus"></i> Aggiungi marcatore</button></div>
                     <div class="team-container"><div class="team-title"><i class="fas fa-futbol"></i> Goal <span id="teamANameGoalsB" style="color:#000000;">Squadra B</span></div><div id="goalsBContainer"></div><button type="button" class="add-goal-player-btn" onclick="addGoalPlayer('B')"><i class="fas fa-plus"></i> Aggiungi marcatore</button></div>
                     <div class="form-group"><label><i class="fas fa-star"></i> Miglior Giocatore (MVP)</label><select id="mvp"><option value="">Seleziona MVP</option></select></div>
-                    <div class="form-group"><label><i class="fas fa-glove" style="color:#e74c3c;"></i> Miglior Portiere</label><select id="bestGoalkeeper"><option value="">Seleziona</option></select></div>
+                    <div class="form-group"><label><i class="fas fa-glove glove-icon"></i> Miglior Portiere</label><select id="bestGoalkeeper"><option value="">Seleziona</option></select></div>
                     <div class="form-group"><label><i class="fas fa-calendar"></i> Data</label><input type="date" id="matchDate"></div>
                     <div style="display:flex; gap:10px;"><button id="saveMatchBtn" style="flex:1;"><i class="fas fa-save"></i> Registra Partita</button><button onclick="hideNewMatchForm()" style="background:#95a5a6;flex:1;"><i class="fas fa-times"></i> Annulla</button></div>
                 </div>
@@ -511,7 +517,7 @@
                     </div>
                     <div class="checkbox-wrapper">
                         <input type="checkbox" id="isGoalkeeper">
-                        <label for="isGoalkeeper"><i class="fas fa-glove" style="color:#e74c3c;"></i> Portiere</label>
+                        <label for="isGoalkeeper"><i class="fas fa-glove glove-icon"></i> Portiere</label>
                     </div>
                     <button type="submit" id="addPlayerBtn"><i class="fas fa-plus"></i> Aggiungi Giocatore</button>
                 </form>
@@ -1339,7 +1345,33 @@
         const confirmNoBtn = document.getElementById('confirmNoBtn');
         if (confirmNoBtn) { const newBtn = confirmNoBtn.cloneNode(true); confirmNoBtn.parentNode.replaceChild(newBtn, confirmNoBtn); newBtn.addEventListener('click', () => { if (pendingConfirmCallback?.onCancel) pendingConfirmCallback.onCancel(); closeConfirmDialog(); }); }
         
-        function showSummaryModal(title, content, onConfirm) { const modal = document.getElementById('summaryModal'); const contentDiv = document.getElementById('summaryContent'); if (modal && contentDiv) { contentDiv.innerHTML = `<h3 style="margin-bottom:15px;">${title}</h3>${content}`; modal.style.display = 'flex'; pendingSaveCallback = onConfirm; } }
+        function showSummaryModal(title, content, onConfirm) { 
+            const modal = document.getElementById('summaryModal'); 
+            const contentDiv = document.getElementById('summaryContent'); 
+            if (modal && contentDiv) { 
+                // Applica i colori delle squadre al riepilogo
+                const teamAColor = teamSettings.colorA1 || '#e74c3c';
+                const teamBColor = teamSettings.colorB1 || '#3498db';
+                const teamAName = teamSettings.nameA;
+                const teamBName = teamSettings.nameB;
+                
+                // Sostituisci i placeholder nel content con i colori
+                let coloredContent = content;
+                // Sostituisci gli stili di sfondo dinamici
+                coloredContent = coloredContent.replace(/background:linear-gradient\(135deg, #2ecc71, #27ae60\)/g, `background:${teamAColor}`);
+                coloredContent = coloredContent.replace(/background:#2ecc71/g, `background:${teamAColor}`);
+                // Per la squadra B usa un colore diverso                coloredContent = coloredContent.replace(/background:linear-gradient\(135deg, #2ecc71, #27ae60\)/g, `background:${teamBColor}`);
+                coloredContent = coloredContent.replace(/background:#2ecc71/g, `background:${teamBColor}`);
+                
+                // Applica i colori ai titoli delle squadre nel riepilogo
+                coloredContent = coloredContent.replace(/Squadra A/g, `<span style="color:${teamAColor};font-weight:700;">${teamAName}</span>`);
+                coloredContent = coloredContent.replace(/Squadra B/g, `<span style="color:${teamBColor};font-weight:700;">${teamBName}</span>`);
+                
+                contentDiv.innerHTML = `<h3 style="margin-bottom:15px;">${title}</h3>${coloredContent}`; 
+                modal.style.display = 'flex'; 
+                pendingSaveCallback = onConfirm; 
+            } 
+        }
         function closeSummaryModal() { const modal = document.getElementById('summaryModal'); if (modal) modal.style.display = 'none'; pendingSaveCallback = null; }
         function confirmSave() { if (pendingSaveCallback) { pendingSaveCallback(); closeSummaryModal(); } }
         
@@ -1364,6 +1396,9 @@
         
         function generateSummaryContent(teamAIds, teamBIds, goalsA, goalsB, mvpId, bestGkId, date) {
             const teamAName = teamSettings.nameA; const teamBName = teamSettings.nameB;
+            const teamAColor = teamSettings.colorA1 || '#e74c3c';
+            const teamBColor = teamSettings.colorB1 || '#3498db';
+            
             let teamAPlayersHtml = '<div class="summary-team-players">';
             teamAIds.forEach(id => { const p = players.find(p => p.id === id); if (p) teamAPlayersHtml += `<span class="summary-player-badge A"><i class="fas fa-user"></i> ${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</span>`; });
             teamAPlayersHtml += '</div>';
@@ -1394,22 +1429,22 @@
             
             return `<div class="summary-stats">
                         <p><strong><i class="fas fa-calendar"></i> Data:</strong> ${formatDate(date)}</p>
-                        <p><strong><i class="fas fa-trophy"></i> Squadra A:</strong> ${escapeHtml(teamAName)}</p>
+                        <p><strong><i class="fas fa-trophy"></i> Squadra A:</strong> <span style="color:${teamAColor};font-weight:700;">${escapeHtml(teamAName)}</span></p>
                         ${teamAPlayersHtml}
-                        <p><strong><i class="fas fa-trophy"></i> Squadra B:</strong> ${escapeHtml(teamBName)}</p>
+                        <p><strong><i class="fas fa-trophy"></i> Squadra B:</strong> <span style="color:${teamBColor};font-weight:700;">${escapeHtml(teamBName)}</span></p>
                         ${teamBPlayersHtml}
                         <p><strong><i class="fas fa-star" style="color:#f39c12;"></i> MVP:</strong> ${mvpPlayer ? escapeHtml(mvpPlayer.name) : '<span style="color:#999;">Non selezionato</span>'}</p>
                         <p><strong><i class="fas fa-glove glove-icon"></i> Miglior Portiere:</strong> ${bestGk ? escapeHtml(bestGk.name) : '<span style="color:#999;">Non selezionato</span>'}</p>
                     </div>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
                         <div>
-                            <div style="background:#2ecc71; color:white; padding:8px; border-radius:10px; text-align:center; margin-bottom:10px;">
+                            <div style="background:${teamAColor}; color:white; padding:8px; border-radius:10px; text-align:center; margin-bottom:10px;">
                                 <strong><i class="fas fa-futbol"></i> Goal ${escapeHtml(teamAName)} (${goalsA.length})</strong>
                             </div>
                             ${goalsAHtml}
                         </div>
                         <div>
-                            <div style="background:#2ecc71; color:white; padding:8px; border-radius:10px; text-align:center; margin-bottom:10px;">
+                            <div style="background:${teamBColor}; color:white; padding:8px; border-radius:10px; text-align:center; margin-bottom:10px;">
                                 <strong><i class="fas fa-futbol"></i> Goal ${escapeHtml(teamBName)} (${goalsB.length})</strong>
                             </div>
                             ${goalsBHtml}
@@ -1884,9 +1919,9 @@
         function getPlayerAvatarHtml(player, size) {
             size = size || 45;
             if (player && player.photo) {
-                return `<img src="${player.photo}" class="ranking-avatar" style="width:${size}px;height:${size}px;">`;
+                return `<img src="${player.photo}" class="ranking-avatar" style="width:${size}px;height:${size}px;border-radius:50%;">`;
             } else if (player) {
-                return `<div class="ranking-avatar" style="width:${size}px;height:${size}px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2ecc71,#27ae60);color:white;border-radius:50%;font-size:${size*0.4}px;"><i class="fas fa-user"></i></div>`;
+                return `<div class="ranking-avatar" style="width:${size}px;height:${size}px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2ecc71,#27ae60);color:white;font-size:${size*0.4}px;"><i class="fas fa-user"></i></div>`;
             }
             return '';
         }
@@ -2058,7 +2093,7 @@
             
             function getBestPlayerHtml(player) {
                 if (!player || player.name === '---') return '---';
-                const avatarHtml = player.photo ? `<img src="${player.photo}" class="ranking-avatar" style="width:45px;height:45px;">` : `<div class="ranking-avatar" style="width:45px;height:45px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2ecc71,#27ae60);color:white;border-radius:50%;font-size:16px;"><i class="fas fa-user"></i></div>`;
+                const avatarHtml = player.photo ? `<img src="${player.photo}" class="ranking-avatar" style="width:45px;height:45px;border-radius:50%;">` : `<div class="ranking-avatar" style="width:45px;height:45px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2ecc71,#27ae60);color:white;font-size:16px;"><i class="fas fa-user"></i></div>`;
                 return `${avatarHtml} ${escapeHtml(player.name)}`;
             }
             
