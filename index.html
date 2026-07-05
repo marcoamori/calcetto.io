@@ -84,13 +84,10 @@
         .user-bar-inline .username {
             font-weight: 700;
             margin-right: auto;
-            font-size: 1.1em;
+            font-size: 1.3em;
         }
         .user-bar-inline .badge {
-            background: rgba(255,255,255,0.2);
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 0.7em;
+            display: none !important;
         }
         .user-bar-inline button {
             background: rgba(255,255,255,0.15);
@@ -112,14 +109,12 @@
         
         @media (max-width: 768px) {
             .user-bar-inline { padding: 6px 12px; gap: 6px; font-size: 0.75em; border-radius: 12px; }
-            .user-bar-inline .username { font-size: 0.9em; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-            .user-bar-inline .badge { font-size: 0.6em; padding: 1px 6px; }
+            .user-bar-inline .username { font-size: 1em; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
             .user-bar-inline button { padding: 4px 8px; font-size: 0.65em; min-height: 26px; min-width: 30px; }
             .campionato-title-wrapper .title { font-size: 1.4em; }
         }
         @media (max-width: 400px) {
-            .user-bar-inline .username { max-width: 50px; font-size: 0.8em; }
-            .user-bar-inline .badge { display: none; }
+            .user-bar-inline .username { max-width: 50px; font-size: 0.9em; }
             .user-bar-inline button { padding: 3px 6px; font-size: 0.55em; min-height: 22px; }
             .campionato-title-wrapper .title { font-size: 1.2em; }
         }
@@ -150,11 +145,20 @@
         .player-avatar { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid #2ecc71; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .ranking-avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 3px solid #2ecc71; vertical-align: middle; margin-right: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         
-        /* PLAYER CARD CON SFONDO TRASPARENTE */
-        .player-card { background: rgba(255,255,255,0.8); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); padding: 15px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border: 1px solid rgba(224, 232, 240, 0.5); transition: all 0.3s; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        /* PLAYER CARD CON SFONDO TRASPARENTE E NOMI ALLINEATI A SINISTRA */
+        .player-card { background: rgba(255,255,255,0.8); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); padding: 15px; border-radius: 16px; display: flex; justify-content: flex-start; align-items: center; flex-wrap: wrap; gap: 15px; border: 1px solid rgba(224, 232, 240, 0.5); transition: all 0.3s; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
         .player-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); border-color: #2ecc71; }
         
-        .player-info h3 { font-size: 1.3em; margin-bottom: 5px; color: #2c3e50; }
+        .player-info {
+            flex: 1;
+            text-align: left;
+        }
+        .player-info h3 {
+            font-size: 1.3em;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            text-align: left;
+        }
         .player-stats { font-size: 0.9em; color: #2c3e50; display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px; }
         .player-stats span { 
             display: inline-flex; 
@@ -473,7 +477,6 @@
             <!-- BARRA UTENTE -->
             <div id="userBarInline" class="user-bar-inline" style="display: none;">
                 <span class="username"><i class="fas fa-user-circle"></i> <span id="currentUsernameInline"></span></span>
-                <span id="roleBadgeInline" class="badge" style="display:none;"></span>
                 <button class="admin-btn" onclick="openAdminModal()"><i class="fas fa-crown"></i> Admin</button>
                 <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Esci</button>
             </div>
@@ -935,7 +938,6 @@
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('userBarInline').style.display = 'flex';
                 document.getElementById('currentUsernameInline').textContent = currentUser.username;
-                document.getElementById('roleBadgeInline').style.display = 'none';
                 document.getElementById('campionatiView').style.display = 'block';
                 document.getElementById('mainApp').style.display = 'none';
                 document.getElementById('createCampBtn').style.display = 'none';
@@ -1069,7 +1071,6 @@
         function updateAdminUI() {
             const adminStatusSpan = document.getElementById('adminStatus');
             const createCampBtn = document.getElementById('createCampBtn');
-            const roleBadge = document.getElementById('roleBadgeInline');
             
             if (isAdminMode) {
                 if (adminStatusSpan) {
@@ -1077,23 +1078,12 @@
                     adminStatusSpan.style.background = '#2ecc71';
                 }
                 if (createCampBtn) createCampBtn.style.display = 'inline-flex';
-                if (roleBadge) {
-                    roleBadge.style.display = 'none';
-                }
             } else {
                 if (adminStatusSpan) {
                     adminStatusSpan.innerHTML = '<i class="fas fa-lock"></i>';
                     adminStatusSpan.style.background = 'rgba(0,0,0,0.5)';
                 }
                 if (createCampBtn) createCampBtn.style.display = 'none';
-                if (roleBadge) {
-                    roleBadge.innerHTML = '👁️ Solo Lettura';
-                    roleBadge.style.background = '#95a5a6';
-                    roleBadge.style.padding = '2px 10px';
-                    roleBadge.style.borderRadius = '20px';
-                    roleBadge.style.fontSize = '0.7em';
-                    roleBadge.style.display = 'inline-block';
-                }
             }
             updateEditButtons();
             updateMatchesList();
@@ -1475,14 +1465,14 @@
                             ${p.isGoalkeeper ? '<span class="badge"><i class="fas fa-hand-paper hand-icon"></i> Portiere</span>' : '<span class="badge"><i class="fas fa-futbol"></i> Calciatore</span>'}
                         </h3>
                         <div class="player-stats">
+                            ${p.isGoalkeeper ? `<span title="Gol subiti"><i class="fas fa-futbol" style="color:#e74c3c;"></i> Gol Subiti: ${p.goalsConceded}</span>` : ''}
                             <span title="Goal fatti"><i class="fas fa-futbol"></i> Gol: ${p.goalsScored}</span>
                             <span title="Assist"><i class="fas fa-handshake"></i> Assist: ${p.assists}</span>
-                            <span title="Autoreti"><i class="fas fa-skull"></i> Autoreti: ${p.ownGoals}</span>
+                            ${!p.isGoalkeeper ? `<span title="Autoreti"><i class="fas fa-skull"></i> Autoreti: ${p.ownGoals}</span>` : ''}
                             <span title="Partite vinte"><i class="fas fa-trophy"></i> Vinte: ${p.wins}</span>
                             <span title="Partite pareggiate"><i class="fas fa-equals"></i> Par: ${p.draws}</span>
                             <span title="Partite perse"><i class="fas fa-times"></i> Perse: ${p.losses}</span>
-                            <span title="Premi MVP"><i class="fas fa-star"></i> MVP: ${p.mvpAwards}</span>
-                            ${p.isGoalkeeper ? `<span title="Gol subiti"><i class="fas fa-futbol" style="color:#e74c3c;"></i> Gol Subiti: ${p.goalsConceded}</span>` : ''}
+                            ${!p.isGoalkeeper ? `<span title="Premi MVP"><i class="fas fa-star"></i> MVP: ${p.mvpAwards}</span>` : ''}
                             ${p.isGoalkeeper ? `<span title="Miglior Portiere"><i class="fas fa-hand-paper hand-icon"></i><i class="fas fa-star" style="color:#f1c40f;font-size:0.6em;"></i> Miglior Portiere: ${p.bestGoalkeeperAwards}</span>` : ''}
                             ${p.isGoalkeeper ? `<span title="Clean sheet"><i class="fas fa-shield-alt"></i> Clean: ${p.cleanSheets}</span>` : ''}
                             <span title="Partite giocate"><i class="fas fa-calendar"></i> Pres: ${p.matchesPlayed}</span>
@@ -2267,7 +2257,7 @@
             } else {
                 generalRows.forEach(row => {
                     const cells = row.querySelectorAll('td');
-                    if (cells.length >= 10) {
+                    if (cells.length >= 7) {
                         const pos = cells[0].textContent.trim();
                         const giocatore = cells[1].textContent.trim();
                         const punti = cells[2].textContent.trim();
@@ -2275,10 +2265,7 @@
                         const v = cells[4].textContent.trim();
                         const n = cells[5].textContent.trim();
                         const p = cells[6].textContent.trim();
-                        const gf = cells[7].textContent.trim();
-                        const gs = cells[8].textContent.trim();
-                        const diff = cells[9].textContent.trim();
-                        text += `${pos}. ${giocatore} - ${punti} pt  (G:${g} V:${v} N:${n} P:${p} GF:${gf} GS:${gs} Diff:${diff})\n`;
+                        text += `${pos}. ${giocatore} - ${punti} pt  (G:${g} V:${v} N:${n} P:${p})\n`;
                     }
                 });
             }
@@ -2702,11 +2689,11 @@
             const container = document.getElementById('generalRanking'); if (!container) return;
             const withPoints = players.map(p => ({ player:p, points: p.wins*3 + p.draws })).sort((a,b) => b.points - a.points);
             if (players.length === 0) { container.innerHTML = '<p style="text-align:center;padding:20px;">Nessun giocatore</p>'; return; }
-            let html = '<table class="ranking-table"><thead><tr><th>Pos</th><th>Giocatore</th><th>Pti</th><th>G</th><th>V</th><th>N</th><th>P</th><th>GF</th><th>GS</th><th>Diff</th></tr></thead><tbody>';
+            let html = '<table class="ranking-table"><thead><tr><th>Pos</th><th>Giocatore</th><th>Pti</th><th>G</th><th>V</th><th>N</th><th>P</th></tr></thead><tbody>';
             for (let i=0; i<withPoints.length; i++) {
-                const p = withPoints[i].player; const points = withPoints[i].points; const diff = p.goalsScored - p.goalsConceded;
+                const p = withPoints[i].player; const points = withPoints[i].points;
                 const avatarHtml = getPlayerAvatarHtml(p, 55);
-                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>':''}</div></td><td><strong>${points}</strong></td><td>${p.matchesPlayed}</td><td>${p.wins}</td><td>${p.draws}</td><td>${p.losses}</td><td>${p.goalsScored}</td><td>${p.goalsConceded}</td><td>${diff}</td></tr>`;
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>':''}</div></td><td><strong>${points}</strong></td><td>${p.matchesPlayed}</td><td>${p.wins}</td><td>${p.draws}</td><td>${p.losses}</td></tr>`;
             }
             html += '</tbody></table>'; container.innerHTML = html;
         }
@@ -2797,7 +2784,6 @@
                             document.getElementById('loginOverlay').style.display = 'none';
                             document.getElementById('userBarInline').style.display = 'flex';
                             document.getElementById('currentUsernameInline').textContent = currentUser.username;
-                            document.getElementById('roleBadgeInline').style.display = 'none';
                             document.getElementById('campionatiView').style.display = 'block';
                             await loadUserCampionati();
                             updateAdminUI();
