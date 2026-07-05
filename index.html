@@ -172,7 +172,6 @@
             background: rgba(46,204,113,0.15);
             transform: scale(1.02);
         }
-        /* Tooltip personalizzato */
         .player-stats span::after {
             content: attr(title);
             position: absolute;
@@ -197,8 +196,11 @@
         
         .jersey-icon { color: #2c3e50; }
         
-        /* Guanto giallo da portiere */
-        .glove-icon { color: #f1c40f; }
+        /* Mano aperta (sostituisce il guanto) */
+        .hand-icon {
+            color: #f1c40f;
+            font-size: 1.1em;
+        }
         
         /* Selettori per i nomi visibili */
         .players-selector select { min-width: 140px; max-width: 100%; }
@@ -208,7 +210,6 @@
         #newMatchFormContainer { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid rgba(46,204,113,0.3); }
         .matches-title { margin-top: 40px; padding-top: 20px; border-top: 3px solid rgba(46,204,113,0.3); }
         
-        /* Rimuovi spazio bianco sotto le classifiche */
         .ranking-box {
             margin-bottom: 0;
         }
@@ -472,7 +473,7 @@
             <!-- BARRA UTENTE -->
             <div id="userBarInline" class="user-bar-inline" style="display: none;">
                 <span class="username"><i class="fas fa-user-circle"></i> <span id="currentUsernameInline"></span></span>
-                <span id="roleBadgeInline" class="badge">👁️</span>
+                <span id="roleBadgeInline" class="badge" style="display:none;"></span>
                 <button class="admin-btn" onclick="openAdminModal()"><i class="fas fa-crown"></i> Admin</button>
                 <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Esci</button>
             </div>
@@ -508,7 +509,7 @@
                     <div class="team-container"><div class="team-title"><i class="fas fa-futbol"></i> Goal <span id="teamANameGoalsA" style="color:#000000;">Squadra A</span></div><div id="goalsAContainer"></div><button type="button" class="add-goal-player-btn" onclick="addGoalPlayer('A')"><i class="fas fa-plus"></i> Aggiungi marcatore</button></div>
                     <div class="team-container"><div class="team-title"><i class="fas fa-futbol"></i> Goal <span id="teamANameGoalsB" style="color:#000000;">Squadra B</span></div><div id="goalsBContainer"></div><button type="button" class="add-goal-player-btn" onclick="addGoalPlayer('B')"><i class="fas fa-plus"></i> Aggiungi marcatore</button></div>
                     <div class="form-group"><label><i class="fas fa-star"></i> Miglior Giocatore (MVP)</label><select id="mvp"><option value="">Seleziona MVP</option></select></div>
-                    <div class="form-group"><label><i class="fas fa-glove glove-icon"></i> Miglior Portiere</label><select id="bestGoalkeeper"><option value="">Seleziona</option></select></div>
+                    <div class="form-group"><label><i class="fas fa-hand-paper hand-icon"></i> Miglior Portiere</label><select id="bestGoalkeeper"><option value="">Seleziona</option></select></div>
                     <div class="form-group"><label><i class="fas fa-calendar"></i> Data</label><input type="date" id="matchDate"></div>
                     <div style="display:flex; gap:10px;"><button id="saveMatchBtn" style="flex:1;"><i class="fas fa-save"></i> Registra Partita</button><button onclick="hideNewMatchForm()" style="background:#95a5a6;flex:1;"><i class="fas fa-times"></i> Annulla</button></div>
                 </div>
@@ -604,7 +605,7 @@
                     </div>
                     <div class="checkbox-wrapper">
                         <input type="checkbox" id="isGoalkeeper">
-                        <label for="isGoalkeeper"><i class="fas fa-glove glove-icon"></i> Portiere</label>
+                        <label for="isGoalkeeper"><i class="fas fa-hand-paper hand-icon"></i> Portiere</label>
                     </div>
                     <button type="submit" id="addPlayerBtn"><i class="fas fa-plus"></i> Aggiungi Giocatore</button>
                 </form>
@@ -636,9 +637,9 @@
                     <div class="ranking-box"><h3>📊 Classifica Generale Giocatori</h3><div id="generalRanking"></div></div>
                     <div class="ranking-box"><h3>⚽ Capocannonieri</h3><div id="topScorersRanking"></div></div>
                     <div class="ranking-box"><h3>🎯 Assist</h3><div id="assistsRanking"></div></div>
-                    <div class="ranking-box"><h3>🧤 Classifica Portieri (media gol subiti)</h3><div id="goalkeepersStatsRanking"></div></div>
+                    <div class="ranking-box"><h3><i class="fas fa-hand-paper hand-icon"></i> Classifica Portieri (media gol subiti)</h3><div id="goalkeepersStatsRanking"></div></div>
                     <div class="ranking-box"><h3>⭐ Miglior Giocatore (MVP)</h3><div id="mvpRanking"></div></div>
-                    <div class="ranking-box"><h3>🏅 Premio Miglior Portiere</h3><div id="bestGoalkeeperRanking"></div></div>
+                    <div class="ranking-box"><h3><i class="fas fa-hand-paper hand-icon"></i> Premio Miglior Portiere</h3><div id="bestGoalkeeperRanking"></div></div>
                 </div>
             </div>
 
@@ -667,7 +668,7 @@
                     <div class="stat-card"><div class="stat-number" id="bestScorer">---</div><div class="stat-label">⚽ Miglior Marcatore</div><div class="stat-small" id="bestScorerCount"></div></div>
                     <div class="stat-card"><div class="stat-number" id="bestAssist">---</div><div class="stat-label">🎯 Miglior Assistman</div><div class="stat-small" id="bestAssistCount"></div></div>
                     <div class="stat-card"><div class="stat-number" id="bestMVP">---</div><div class="stat-label">⭐ Miglior MVP</div><div class="stat-small" id="bestMVPCount"></div></div>
-                    <div class="stat-card"><div class="stat-number" id="bestGK">---</div><div class="stat-label">🧤 Miglior Portiere</div><div class="stat-small" id="bestGKCount"></div></div>
+                    <div class="stat-card"><div class="stat-number" id="bestGK">---</div><div class="stat-label"><i class="fas fa-hand-paper hand-icon"></i> Miglior Portiere</div><div class="stat-small" id="bestGKCount"></div></div>
                 </div>
             </div>
 
@@ -934,7 +935,7 @@
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('userBarInline').style.display = 'flex';
                 document.getElementById('currentUsernameInline').textContent = currentUser.username;
-                document.getElementById('roleBadgeInline').innerHTML = '👁️';
+                document.getElementById('roleBadgeInline').style.display = 'none';
                 document.getElementById('campionatiView').style.display = 'block';
                 document.getElementById('mainApp').style.display = 'none';
                 document.getElementById('createCampBtn').style.display = 'none';
@@ -1077,11 +1078,7 @@
                 }
                 if (createCampBtn) createCampBtn.style.display = 'inline-flex';
                 if (roleBadge) {
-                    roleBadge.innerHTML = '🔓';
-                    roleBadge.style.background = '#2ecc71';
-                    roleBadge.style.padding = '2px 10px';
-                    roleBadge.style.borderRadius = '20px';
-                    roleBadge.style.fontSize = '0.7em';
+                    roleBadge.style.display = 'none';
                 }
             } else {
                 if (adminStatusSpan) {
@@ -1090,11 +1087,12 @@
                 }
                 if (createCampBtn) createCampBtn.style.display = 'none';
                 if (roleBadge) {
-                    roleBadge.innerHTML = '👁️';
+                    roleBadge.innerHTML = '👁️ Solo Lettura';
                     roleBadge.style.background = '#95a5a6';
                     roleBadge.style.padding = '2px 10px';
                     roleBadge.style.borderRadius = '20px';
                     roleBadge.style.fontSize = '0.7em';
+                    roleBadge.style.display = 'inline-block';
                 }
             }
             updateEditButtons();
@@ -1368,7 +1366,7 @@
                     </div>
                     <div class="checkbox-wrapper">
                         <input type="checkbox" id="editIsGoalkeeper" ${player.isGoalkeeper ? 'checked' : ''}>
-                        <label for="editIsGoalkeeper"><i class="fas fa-glove glove-icon"></i> Portiere</label>
+                        <label for="editIsGoalkeeper"><i class="fas fa-hand-paper hand-icon"></i> Portiere</label>
                     </div>
                     <div style="display:flex;gap:10px;margin-top:20px;">
                         <button onclick="savePlayerEdit(${playerId})" style="flex:1;"><i class="fas fa-save"></i> Salva</button>
@@ -1473,8 +1471,8 @@
                     ${p.photo ? `<img class="player-avatar" src="${p.photo}">` : `<div class="player-avatar" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2ecc71,#27ae60);color:white;font-size:24px;"><i class="fas fa-user"></i></div>`}
                     <div class="player-info">
                         <h3><strong>${escapeHtml(p.name)}</strong> 
-                            <span class="badge">${p.isGoalkeeper ? '<i class="fas fa-glove glove-icon"></i>' : '<i class="fas fa-shirt jersey-icon"></i>'} ${p.number}</span> 
-                            ${p.isGoalkeeper ? '<span class="badge"><i class="fas fa-glove glove-icon"></i> <i class="fas fa-glove glove-icon"></i> Portiere</span>' : '<span class="badge"><i class="fas fa-futbol"></i> Calciatore</span>'}
+                            <span class="badge">${p.isGoalkeeper ? '<i class="fas fa-hand-paper hand-icon"></i>' : '<i class="fas fa-shirt jersey-icon"></i>'} ${p.number}</span> 
+                            ${p.isGoalkeeper ? '<span class="badge"><i class="fas fa-hand-paper hand-icon"></i> Portiere</span>' : '<span class="badge"><i class="fas fa-futbol"></i> Calciatore</span>'}
                         </h3>
                         <div class="player-stats">
                             <span title="Goal fatti"><i class="fas fa-futbol"></i> Gol: ${p.goalsScored}</span>
@@ -1484,8 +1482,9 @@
                             <span title="Partite pareggiate"><i class="fas fa-equals"></i> Par: ${p.draws}</span>
                             <span title="Partite perse"><i class="fas fa-times"></i> Perse: ${p.losses}</span>
                             <span title="Premi MVP"><i class="fas fa-star"></i> MVP: ${p.mvpAwards}</span>
-                            <span title="Miglior Portiere"><i class="fas fa-glove glove-icon"></i><i class="fas fa-star" style="color:#f1c40f;font-size:0.6em;"></i> Miglior Portiere: ${p.bestGoalkeeperAwards}</span>
-                            <span title="Clean sheet"><i class="fas fa-shield-alt"></i> Clean: ${p.cleanSheets}</span>
+                            ${p.isGoalkeeper ? `<span title="Gol subiti"><i class="fas fa-futbol" style="color:#e74c3c;"></i> Gol Subiti: ${p.goalsConceded}</span>` : ''}
+                            ${p.isGoalkeeper ? `<span title="Miglior Portiere"><i class="fas fa-hand-paper hand-icon"></i><i class="fas fa-star" style="color:#f1c40f;font-size:0.6em;"></i> Miglior Portiere: ${p.bestGoalkeeperAwards}</span>` : ''}
+                            ${p.isGoalkeeper ? `<span title="Clean sheet"><i class="fas fa-shield-alt"></i> Clean: ${p.cleanSheets}</span>` : ''}
                             <span title="Partite giocate"><i class="fas fa-calendar"></i> Pres: ${p.matchesPlayed}</span>
                         </div>
                     </div>
@@ -1497,7 +1496,7 @@
             `).join(''); 
         }
         
-        function getTeamPlayersList(teamIds) { if (!teamIds || teamIds.length === 0) return ''; let html = '<div class="team-players-list">'; for (let id of teamIds) { const p = players.find(p => p.id === id); if (p) html += `<span class="player-tag"><i class="fas fa-user"></i> ${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</span>`; } html += '</div>'; return html; }
+        function getTeamPlayersList(teamIds) { if (!teamIds || teamIds.length === 0) return ''; let html = '<div class="team-players-list">'; for (let id of teamIds) { const p = players.find(p => p.id === id); if (p) html += `<span class="player-tag"><i class="fas fa-user"></i> ${escapeHtml(p.name)}${p.isGoalkeeper ? ' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>' : ''}</span>`; } html += '</div>'; return html; }
         
         function formatGoalsList(goals) { if (!goals || goals.length === 0) return '<span style="color:#999;">Nessun goal</span>'; const counts = {}; for (let g of goals) { const p = players.find(p => p.id === g.playerId); if (p) { const key = `${p.id}_${g.isOwnGoal}`; if (!counts[key]) counts[key] = { name: p.name, count: 0, isOwnGoal: g.isOwnGoal }; counts[key].count++; } } let html = '<div class="match-goals-list">'; for (let g of Object.values(counts)) { if (g.isOwnGoal) html += `<span class="own-goal-badge"><i class="fas fa-futbol"></i> ${escapeHtml(g.name)}: ${g.count} <span style="background:#c0392b;padding:2px 6px;border-radius:12px;">AUTOGOL</span></span>`; else html += `<span class="goal-badge"><i class="fas fa-futbol"></i> ${escapeHtml(g.name)}: ${g.count}</span>`; } html += '</div>'; return html; }
         
@@ -1542,7 +1541,7 @@
                         <div style="display:flex;flex-wrap:wrap;gap:15px;margin-bottom:15px;">
                             <div><i class="fas fa-calendar"></i> <strong>Data:</strong> ${formatDate(m.date)}</div>
                             <div><i class="fas fa-star" style="color:#f39c12;"></i> <strong>MVP:</strong> ${mvpP ? escapeHtml(mvpP.name) : '<span style="color:#999;">Non selezionato</span>'}</div>
-                            <div><i class="fas fa-glove glove-icon"></i> <strong>Miglior Portiere:</strong> ${bestGk ? escapeHtml(bestGk.name) : '<span style="color:#999;">Non selezionato</span>'}</div>
+                            <div><i class="fas fa-hand-paper hand-icon"></i> <strong>Miglior Portiere:</strong> ${bestGk ? escapeHtml(bestGk.name) : '<span style="color:#999;">Non selezionato</span>'}</div>
                         </div>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
                             <div>
@@ -1668,18 +1667,18 @@
         // FUNZIONI PARTITA
         function updateGoalCountersNew() { const aCount = goalsData.A.filter(g => g.playerId).length; const bCount = goalsData.B.filter(g => g.playerId).length; const aSpan = document.getElementById('goalsACountNew'); const bSpan = document.getElementById('goalsBCountNew'); if (aSpan) aSpan.innerHTML = `${aCount} goal`; if (bSpan) bSpan.innerHTML = `${bCount} goal`; }
         function hideNewMatchForm() { const container = document.getElementById('newMatchFormContainer'); if (container) container.style.display = 'none'; }
-        function updateMvpAndGkSelectors() { const teamA = getCurrentTeamPlayers('A'); const teamB = getCurrentTeamPlayers('B'); const all = [...teamA, ...teamB]; const field = all.filter(p => !p.isGoalkeeper); const mvpSel = document.getElementById('mvp'); if (mvpSel) mvpSel.innerHTML = '<option value="">Seleziona MVP</option>' + field.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join(''); const gk = all.filter(p => p.isGoalkeeper); const gkSel = document.getElementById('bestGoalkeeper'); if (gkSel) { if (gk.length === 0) gkSel.innerHTML = '<option value="">Seleziona Miglior Portiere</option><option disabled>⚠️ Nessun portiere</option>'; else gkSel.innerHTML = '<option value="">Seleziona Miglior Portiere</option>' + gk.map(p => `<option value="${p.id}">${escapeHtml(p.name)} 🧤</option>`).join(''); } }
+        function updateMvpAndGkSelectors() { const teamA = getCurrentTeamPlayers('A'); const teamB = getCurrentTeamPlayers('B'); const all = [...teamA, ...teamB]; const field = all.filter(p => !p.isGoalkeeper); const mvpSel = document.getElementById('mvp'); if (mvpSel) mvpSel.innerHTML = '<option value="">Seleziona MVP</option>' + field.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join(''); const gk = all.filter(p => p.isGoalkeeper); const gkSel = document.getElementById('bestGoalkeeper'); if (gkSel) { if (gk.length === 0) gkSel.innerHTML = '<option value="">Seleziona Miglior Portiere</option><option disabled>⚠️ Nessun portiere</option>'; else gkSel.innerHTML = '<option value="">Seleziona Miglior Portiere</option>' + gk.map(p => `<option value="${p.id}">${escapeHtml(p.name)} <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i></option>`).join(''); } }
         function addGoalPlayer(team) { const teamPlayers = getCurrentTeamPlayers(team); if (teamPlayers.length === 0) { showAlert('Seleziona prima i giocatori della squadra!', 'error'); return; } goalsData[team].push({ playerId: null, isOwnGoal: false, assistId: null }); renderGoalsContainer(team); updateGoalCountersNew(); }
         function removeGoalPlayer(team, idx) { goalsData[team].splice(idx, 1); renderGoalsContainer(team); updateGoalCountersNew(); }
         function updateGoalPlayerType(team, idx, val) { goalsData[team][idx].isOwnGoal = val === 'true'; goalsData[team][idx].assistId = null; goalsData[team][idx].playerId = null; renderGoalsContainer(team); updateGoalCountersNew(); }
         function updateGoalPlayerPlayer(team, idx, playerId) { goalsData[team][idx].playerId = playerId ? parseInt(playerId) : null; renderGoalsContainer(team); updateGoalCountersNew(); }
         function updateGoalPlayerAssist(team, idx, assistId) { goalsData[team][idx].assistId = assistId ? parseInt(assistId) : null; }
         function validateGoalsComplete() { let missing = []; goalsData.A.forEach((g, i) => { if (!g.playerId) missing.push(`Squadra A - Goal ${i+1}`); }); goalsData.B.forEach((g, i) => { if (!g.playerId) missing.push(`Squadra B - Goal ${i+1}`); }); return { valid: missing.length === 0, missing }; }
-        function renderGoalsContainer(team) { const container = document.getElementById(`goals${team}Container`); if (!container) return; const teamPlayers = getCurrentTeamPlayers(team); const oppPlayers = team === 'A' ? getCurrentTeamPlayers('B') : getCurrentTeamPlayers('A'); if (goalsData[team].length === 0) { container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;"><i class="fas fa-info-circle"></i> Nessun evento.</p>'; return; } container.innerHTML = goalsData[team].map((g, idx) => { const isOwn = g.isOwnGoal; const avail = isOwn ? oppPlayers : teamPlayers; const availAssist = teamPlayers.filter(p => p.id !== g.playerId); const missing = !g.playerId; return `<div class="goal-player-group"><div class="goal-player-header"><select class="goal-type-select" onchange="updateGoalPlayerType('${team}', ${idx}, this.value)" style="padding:10px;width:130px;"><option value="false" ${!isOwn ? 'selected' : ''}>⚽ Goal</option><option value="true" ${isOwn ? 'selected' : ''}>😵 Autorete</option></select><select onchange="updateGoalPlayerPlayer('${team}', ${idx}, this.value)" style="flex:2;padding:10px; ${missing ? 'border-color:#e74c3c;background:#ffe6e6;' : ''}"><option value="">⚠️ Seleziona</option>${avail.map(p => `<option value="${p.id}" ${g.playerId == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`).join('')}</select>${missing ? '<span style="color:#e74c3c;"><i class="fas fa-exclamation-triangle"></i> Obbligatorio</span>' : ''}</div>${!isOwn ? `<div class="goal-player-header"><select onchange="updateGoalPlayerAssist('${team}', ${idx}, this.value)" style="flex:2;padding:10px;margin-left:142px;"><option value="">Nessun assist</option>${availAssist.map(p => `<option value="${p.id}" ${g.assistId == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`).join('')}</select></div>` : ''}<div class="goal-player-header"><button class="remove-goal-player" onclick="removeGoalPlayer('${team}', ${idx})"><i class="fas fa-trash-alt"></i> Rimuovi</button></div></div>`; }).join(''); }
+        function renderGoalsContainer(team) { const container = document.getElementById(`goals${team}Container`); if (!container) return; const teamPlayers = getCurrentTeamPlayers(team); const oppPlayers = team === 'A' ? getCurrentTeamPlayers('B') : getCurrentTeamPlayers('A'); if (goalsData[team].length === 0) { container.innerHTML = '<p style="color:#999;text-align:center;padding:20px;"><i class="fas fa-info-circle"></i> Nessun evento.</p>'; return; } container.innerHTML = goalsData[team].map((g, idx) => { const isOwn = g.isOwnGoal; const avail = isOwn ? oppPlayers : teamPlayers; const availAssist = teamPlayers.filter(p => p.id !== g.playerId); const missing = !g.playerId; return `<div class="goal-player-group"><div class="goal-player-header"><select class="goal-type-select" onchange="updateGoalPlayerType('${team}', ${idx}, this.value)" style="padding:10px;width:130px;"><option value="false" ${!isOwn ? 'selected' : ''}>⚽ Goal</option><option value="true" ${isOwn ? 'selected' : ''}>😵 Autorete</option></select><select onchange="updateGoalPlayerPlayer('${team}', ${idx}, this.value)" style="flex:2;padding:10px; ${missing ? 'border-color:#e74c3c;background:#ffe6e6;' : ''}"><option value="">⚠️ Seleziona</option>${avail.map(p => `<option value="${p.id}" ${g.playerId == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>' : ''}</option>`).join('')}</select>${missing ? '<span style="color:#e74c3c;"><i class="fas fa-exclamation-triangle"></i> Obbligatorio</span>' : ''}</div>${!isOwn ? `<div class="goal-player-header"><select onchange="updateGoalPlayerAssist('${team}', ${idx}, this.value)" style="flex:2;padding:10px;margin-left:142px;"><option value="">Nessun assist</option>${availAssist.map(p => `<option value="${p.id}" ${g.assistId == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>' : ''}</option>`).join('')}</select></div>` : ''}<div class="goal-player-header"><button class="remove-goal-player" onclick="removeGoalPlayer('${team}', ${idx})"><i class="fas fa-trash-alt"></i> Rimuovi</button></div></div>`; }).join(''); }
         function getCurrentTeamPlayers(team) { const ids = []; for (let i=1; i<=playersPerTeam; i++) { const sel = document.getElementById(`team${team}_${i}`); if (sel && sel.value) ids.push(parseInt(sel.value)); } return players.filter(p => ids.includes(p.id)); }
         function collectGoalsFromData(team) { const goals = []; goalsData[team].forEach(g => { if (g.playerId) goals.push({ playerId: g.playerId, isOwnGoal: g.isOwnGoal, assistId: g.assistId }); }); return goals; }
-        function updateMatchSelectors() { const aContainer = document.getElementById('teamASelectors'); const bContainer = document.getElementById('teamBSelectors'); if (!aContainer || !bContainer) return; const all = getSortedPlayers(); let aHtml = '', bHtml = ''; for (let i=1; i<=playersPerTeam; i++) { aHtml += `<select class="players-select" id="teamA_${i}" required onchange="updateSelectOptions()"><option value="">Giocatore ${i}</option>${all.map(p => `<option value="${p.id}">${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`).join('')}</select>`; bHtml += `<select class="players-select" id="teamB_${i}" required onchange="updateSelectOptions()"><option value="">Giocatore ${i}</option>${all.map(p => `<option value="${p.id}">${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`).join('')}</select>`; } aContainer.innerHTML = aHtml; bContainer.innerHTML = bHtml; updateSelectOptions(); }
-        function updateSelectOptions() { const selectedA = []; for (let i=1; i<=playersPerTeam; i++) { const sel = document.getElementById(`teamA_${i}`); if (sel && sel.value) selectedA.push(parseInt(sel.value)); } const selectedB = []; for (let i=1; i<=playersPerTeam; i++) { const sel = document.getElementById(`teamB_${i}`); if (sel && sel.value) selectedB.push(parseInt(sel.value)); } for (let i=1; i<=playersPerTeam; i++) { const selA = document.getElementById(`teamA_${i}`); if (selA) { const cur = selA.value; const exclude = [...selectedA.filter(id => id != cur), ...selectedB]; const avail = players.filter(p => !exclude.includes(p.id)); let opts = '<option value="">Seleziona</option>'; avail.forEach(p => { opts += `<option value="${p.id}" ${cur == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`; }); selA.innerHTML = opts; } const selB = document.getElementById(`teamB_${i}`); if (selB) { const cur = selB.value; const exclude = [...selectedB.filter(id => id != cur), ...selectedA]; const avail = players.filter(p => !exclude.includes(p.id)); let opts = '<option value="">Seleziona</option>'; avail.forEach(p => { opts += `<option value="${p.id}" ${cur == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' 🧤' : ''}</option>`; }); selB.innerHTML = opts; } } updateMvpAndGkSelectors(); }
+        function updateMatchSelectors() { const aContainer = document.getElementById('teamASelectors'); const bContainer = document.getElementById('teamBSelectors'); if (!aContainer || !bContainer) return; const all = getSortedPlayers(); let aHtml = '', bHtml = ''; for (let i=1; i<=playersPerTeam; i++) { aHtml += `<select class="players-select" id="teamA_${i}" required onchange="updateSelectOptions()"><option value="">Giocatore ${i}</option>${all.map(p => `<option value="${p.id}">${escapeHtml(p.name)}${p.isGoalkeeper ? ' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>' : ''}</option>`).join('')}</select>`; bHtml += `<select class="players-select" id="teamB_${i}" required onchange="updateSelectOptions()"><option value="">Giocatore ${i}</option>${all.map(p => `<option value="${p.id}">${escapeHtml(p.name)}${p.isGoalkeeper ? ' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>' : ''}</option>`).join('')}</select>`; } aContainer.innerHTML = aHtml; bContainer.innerHTML = bHtml; updateSelectOptions(); }
+        function updateSelectOptions() { const selectedA = []; for (let i=1; i<=playersPerTeam; i++) { const sel = document.getElementById(`teamA_${i}`); if (sel && sel.value) selectedA.push(parseInt(sel.value)); } const selectedB = []; for (let i=1; i<=playersPerTeam; i++) { const sel = document.getElementById(`teamB_${i}`); if (sel && sel.value) selectedB.push(parseInt(sel.value)); } for (let i=1; i<=playersPerTeam; i++) { const selA = document.getElementById(`teamA_${i}`); if (selA) { const cur = selA.value; const exclude = [...selectedA.filter(id => id != cur), ...selectedB]; const avail = players.filter(p => !exclude.includes(p.id)); let opts = '<option value="">Seleziona</option>'; avail.forEach(p => { opts += `<option value="${p.id}" ${cur == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>' : ''}</option>`; }); selA.innerHTML = opts; } const selB = document.getElementById(`teamB_${i}`); if (selB) { const cur = selB.value; const exclude = [...selectedB.filter(id => id != cur), ...selectedA]; const avail = players.filter(p => !exclude.includes(p.id)); let opts = '<option value="">Seleziona</option>'; avail.forEach(p => { opts += `<option value="${p.id}" ${cur == p.id ? 'selected' : ''}>${escapeHtml(p.name)}${p.isGoalkeeper ? ' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>' : ''}</option>`; }); selB.innerHTML = opts; } } updateMvpAndGkSelectors(); }
         
         function generateSummaryContent(teamAIds, teamBIds, goalsA, goalsB, mvpId, bestGkId, date) {
             const teamAName = teamSettings.nameA; const teamBName = teamSettings.nameB;
@@ -1687,10 +1686,10 @@
             const teamBColor = teamSettings.colorB1 || '#3498db';
             
             let teamAPlayersHtml = '<div class="summary-team-players">';
-            teamAIds.forEach(id => { const p = players.find(p => p.id === id); if (p) teamAPlayersHtml += `<span class="summary-player-badge A"><i class="fas fa-user"></i> ${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</span>`; });
+            teamAIds.forEach(id => { const p = players.find(p => p.id === id); if (p) teamAPlayersHtml += `<span class="summary-player-badge A"><i class="fas fa-user"></i> ${escapeHtml(p.name)} ${p.isGoalkeeper ? ' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>' : ''}</span>`; });
             teamAPlayersHtml += '</div>';
             let teamBPlayersHtml = '<div class="summary-team-players">';
-            teamBIds.forEach(id => { const p = players.find(p => p.id === id); if (p) teamBPlayersHtml += `<span class="summary-player-badge B"><i class="fas fa-user"></i> ${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</span>`; });
+            teamBIds.forEach(id => { const p = players.find(p => p.id === id); if (p) teamBPlayersHtml += `<span class="summary-player-badge B"><i class="fas fa-user"></i> ${escapeHtml(p.name)} ${p.isGoalkeeper ? ' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>' : ''}</span>`; });
             teamBPlayersHtml += '</div>';
             
             let goalsAHtml = '<div class="summary-goal-list">';
@@ -1721,7 +1720,7 @@
                         <p><strong><i class="fas fa-trophy"></i> Squadra B:</strong> <span style="color:${teamBColor};font-weight:700;">${escapeHtml(teamBName)}</span></p>
                         ${teamBPlayersHtml}
                         <p><strong><i class="fas fa-star" style="color:#f39c12;"></i> MVP:</strong> ${mvpPlayer ? escapeHtml(mvpPlayer.name) : '<span style="color:#999;">Non selezionato</span>'}</p>
-                        <p><strong><i class="fas fa-glove glove-icon"></i> Miglior Portiere:</strong> ${bestGk ? escapeHtml(bestGk.name) : '<span style="color:#999;">Non selezionato</span>'}</p>
+                        <p><strong><i class="fas fa-hand-paper hand-icon"></i> Miglior Portiere:</strong> ${bestGk ? escapeHtml(bestGk.name) : '<span style="color:#999;">Non selezionato</span>'}</p>
                     </div>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
                         <div>
@@ -1829,8 +1828,8 @@
             for (let i = 0; i < playersPerTeam; i++) { 
                 const selectedA = match.teamA[i] || ''; 
                 const selectedB = match.teamB[i] || ''; 
-                teamASelects += `<select class="edit-teamA-select" data-index="${i}" style="width:100%;padding:10px;margin-bottom:8px;border-radius:10px;" onchange="updateEditTeamPlayers()"><option value="">Seleziona</option>${allPlayers.map(p => `<option value="${p.id}" ${selectedA == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`).join('')}</select>`; 
-                teamBSelects += `<select class="edit-teamB-select" data-index="${i}" style="width:100%;padding:10px;margin-bottom:8px;border-radius:10px;" onchange="updateEditTeamPlayers()"><option value="">Seleziona</option>${allPlayers.map(p => `<option value="${p.id}" ${selectedB == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`).join('')}</select>`; 
+                teamASelects += `<select class="edit-teamA-select" data-index="${i}" style="width:100%;padding:10px;margin-bottom:8px;border-radius:10px;" onchange="updateEditTeamPlayers()"><option value="">Seleziona</option>${allPlayers.map(p => `<option value="${p.id}" ${selectedA == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? ' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>' : ''}</option>`).join('')}</select>`; 
+                teamBSelects += `<select class="edit-teamB-select" data-index="${i}" style="width:100%;padding:10px;margin-bottom:8px;border-radius:10px;" onchange="updateEditTeamPlayers()"><option value="">Seleziona</option>${allPlayers.map(p => `<option value="${p.id}" ${selectedB == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? ' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>' : ''}</option>`).join('')}</select>`; 
             } 
             
             const existingGoalsA = match.goalsDetailA ? match.goalsDetailA.map(g => ({ playerId: g.playerId, isOwnGoal: g.isOwnGoal, assistId: g.assistId })) : []; 
@@ -1871,7 +1870,7 @@
                     <select id="editMvp" style="padding:10px;border-radius:10px;"></select>
                 </div>
                 <div class="form-group">
-                    <label><i class="fas fa-glove glove-icon"></i> Miglior Portiere</label>
+                    <label><i class="fas fa-hand-paper hand-icon"></i> Miglior Portiere</label>
                     <select id="editBestGoalkeeper" style="padding:10px;border-radius:10px;"></select>
                 </div>
                 <div class="form-group">
@@ -1895,7 +1894,7 @@
                 const gkSelect = document.getElementById('editBestGoalkeeper'); 
                 if (gkSelect) { 
                     if (goalkeepers.length === 0) gkSelect.innerHTML = '<option value="">Seleziona Miglior Portiere</option><option value="" disabled>⚠️ Nessun portiere in campo</option>'; 
-                    else gkSelect.innerHTML = '<option value="">Seleziona Miglior Portiere</option>' + goalkeepers.map(p => `<option value="${p.id}" ${match.bestGoalkeeper === p.id ? 'selected' : ''}>${escapeHtml(p.name)} 🧤</option>`).join(''); 
+                    else gkSelect.innerHTML = '<option value="">Seleziona Miglior Portiere</option>' + goalkeepers.map(p => `<option value="${p.id}" ${match.bestGoalkeeper === p.id ? 'selected' : ''}>${escapeHtml(p.name)} <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i></option>`).join(''); 
                 } 
             }, 50); 
             
@@ -1919,7 +1918,7 @@
                     const availablePlayers = players.filter(p => !excludeIds.includes(p.id)); 
                     let options = '<option value="">Seleziona giocatore</option>'; 
                     availablePlayers.forEach(p => { 
-                        options += `<option value="${p.id}" ${currentValue == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`; 
+                        options += `<option value="${p.id}" ${currentValue == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? ' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>' : ''}</option>`; 
                     }); 
                     selectA.innerHTML = options; 
                 } 
@@ -1932,7 +1931,7 @@
                     const availablePlayers = players.filter(p => !excludeIds.includes(p.id)); 
                     let options = '<option value="">Seleziona giocatore</option>'; 
                     availablePlayers.forEach(p => { 
-                        options += `<option value="${p.id}" ${currentValue == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`; 
+                        options += `<option value="${p.id}" ${currentValue == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? ' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>' : ''}</option>`; 
                     }); 
                     selectB.innerHTML = options; 
                 } 
@@ -1998,7 +1997,7 @@
             if (gkSelect && (!gkStillValid && currentGk)) gkSelect.value = ''; 
             if (gkSelect) { 
                 if (goalkeepers.length === 0) gkSelect.innerHTML = '<option value="">Seleziona Miglior Portiere</option><option value="" disabled>⚠️ Nessun portiere in campo</option>'; 
-                else gkSelect.innerHTML = '<option value="">Seleziona Miglior Portiere</option>' + goalkeepers.map(p => `<option value="${p.id}" ${(gkStillValid && currentGk == p.id) ? 'selected' : ''}>${escapeHtml(p.name)} 🧤</option>`).join(''); 
+                else gkSelect.innerHTML = '<option value="">Seleziona Miglior Portiere</option>' + goalkeepers.map(p => `<option value="${p.id}" ${(gkStillValid && currentGk == p.id) ? 'selected' : ''}>${escapeHtml(p.name)} <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i></option>`).join(''); 
             } 
             refreshEditGoalsDisplay('A'); 
             refreshEditGoalsDisplay('B'); 
@@ -2078,14 +2077,14 @@
                             </select>
                             <select onchange="updateEditGoalPlayerPlayer('${team}', ${idx}, this.value)" style="flex:2;padding:10px; ${hasMissingPlayer ? 'border-color:#e74c3c; background-color:#ffe6e6;' : ''}">
                                 <option value="">⚠️ Seleziona giocatore</option>
-                                ${availablePlayers.map(p => `<option value="${p.id}" ${g.playerId == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`).join('')}
+                                ${availablePlayers.map(p => `<option value="${p.id}" ${g.playerId == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? ' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>' : ''}</option>`).join('')}
                             </select>
                             ${hasMissingPlayer ? '<span style="color:#e74c3c; font-size:0.7rem;"><i class="fas fa-exclamation-triangle"></i> Obbligatorio</span>' : ''}
                         </div>
                         ${!isOwnGoal ? `<div class="goal-player-header">
                             <select onchange="updateEditGoalPlayerAssist('${team}', ${idx}, this.value)" style="flex:2;padding:10px; margin-left:142px;">
                                 <option value="">Nessun assist</option>
-                                ${availableForAssist.map(p => `<option value="${p.id}" ${g.assistId == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? '🧤' : ''}</option>`).join('')}
+                                ${availableForAssist.map(p => `<option value="${p.id}" ${g.assistId == p.id ? 'selected' : ''}>${escapeHtml(p.name)} ${p.isGoalkeeper ? ' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>' : ''}</option>`).join('')}
                             </select>
                         </div>` : ''}
                         <div class="goal-player-header">
@@ -2642,7 +2641,7 @@
             for (let i=0; i<withGoals.length; i++) {
                 const p = withGoals[i]; const media = p.matchesPlayed > 0 ? (p.goalsScored / p.matchesPlayed).toFixed(2) : '0.00';
                 const avatarHtml = getPlayerAvatarHtml(p, 55);
-                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' 🧤':''}</div></td><td><strong>${p.goalsScored}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>':''}</div></td><td><strong>${p.goalsScored}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
             }
             html += '</tbody></table>'; container.innerHTML = html;
         }
@@ -2655,7 +2654,7 @@
             for (let i=0; i<withAssists.length; i++) {
                 const p = withAssists[i]; const media = p.matchesPlayed > 0 ? (p.assists / p.matchesPlayed).toFixed(2) : '0.00';
                 const avatarHtml = getPlayerAvatarHtml(p, 55);
-                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' 🧤':''}</div></td><td><strong>${p.assists}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>':''}</div></td><td><strong>${p.assists}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
             }
             html += '</tbody></table>'; container.innerHTML = html;
         }
@@ -2668,7 +2667,7 @@
             for (let i=0; i<withMvp.length; i++) {
                 const p = withMvp[i]; const media = p.matchesPlayed > 0 ? (p.mvpAwards / p.matchesPlayed).toFixed(2) : '0.00';
                 const avatarHtml = getPlayerAvatarHtml(p, 55);
-                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' 🧤':''}</div></td><td><strong>${p.mvpAwards}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>':''}</div></td><td><strong>${p.mvpAwards}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
             }
             html += '</tbody></table>'; container.innerHTML = html;
         }
@@ -2681,7 +2680,7 @@
             for (let i=0; i<gks.length; i++) {
                 const p = gks[i]; const media = (p.goalsConceded / p.matchesAsGoalkeeper).toFixed(2);
                 const avatarHtml = getPlayerAvatarHtml(p, 55);
-                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong> 🧤</div></td><td>${p.matchesAsGoalkeeper}</td><td>${p.goalsConceded}</td><td>${media}</td><td>${p.cleanSheets}</td></tr>`;
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong> <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i></div></td><td>${p.matchesAsGoalkeeper}</td><td>${p.goalsConceded}</td><td>${media}</td><td>${p.cleanSheets}</td></tr>`;
             }
             html += '</tbody></table>'; container.innerHTML = html;
         }
@@ -2694,7 +2693,7 @@
             for (let i=0; i<withAwards.length; i++) {
                 const p = withAwards[i]; const media = p.matchesPlayed > 0 ? (p.bestGoalkeeperAwards / p.matchesPlayed).toFixed(2) : '0.00';
                 const avatarHtml = getPlayerAvatarHtml(p, 55);
-                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong> 🧤</div></td><td><strong>${p.bestGoalkeeperAwards}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong> <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i></div></td><td><strong>${p.bestGoalkeeperAwards}</strong></td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
             }
             html += '</tbody></table>'; container.innerHTML = html;
         }
@@ -2707,7 +2706,7 @@
             for (let i=0; i<withPoints.length; i++) {
                 const p = withPoints[i].player; const points = withPoints[i].points; const diff = p.goalsScored - p.goalsConceded;
                 const avatarHtml = getPlayerAvatarHtml(p, 55);
-                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' 🧤':''}</div></td><td><strong>${points}</strong></td><td>${p.matchesPlayed}</td><td>${p.wins}</td><td>${p.draws}</td><td>${p.losses}</td><td>${p.goalsScored}</td><td>${p.goalsConceded}</td><td>${diff}</td></tr>`;
+                html += `<tr class="${i===0?'rank-1':''}"><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<strong>${escapeHtml(p.name)}</strong>${p.isGoalkeeper?' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>':''}</div></td><td><strong>${points}</strong></td><td>${p.matchesPlayed}</td><td>${p.wins}</td><td>${p.draws}</td><td>${p.losses}</td><td>${p.goalsScored}</td><td>${p.goalsConceded}</td><td>${diff}</td></tr>`;
             }
             html += '</tbody></table>'; container.innerHTML = html;
         }
@@ -2798,7 +2797,7 @@
                             document.getElementById('loginOverlay').style.display = 'none';
                             document.getElementById('userBarInline').style.display = 'flex';
                             document.getElementById('currentUsernameInline').textContent = currentUser.username;
-                            document.getElementById('roleBadgeInline').innerHTML = '👁️';
+                            document.getElementById('roleBadgeInline').style.display = 'none';
                             document.getElementById('campionatiView').style.display = 'block';
                             await loadUserCampionati();
                             updateAdminUI();
