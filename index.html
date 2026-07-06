@@ -6,7 +6,6 @@
     <title>Calcetto Manager Pro - Cloud</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
@@ -113,80 +112,11 @@
             .user-bar-inline .username { font-size: 1em; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
             .user-bar-inline button { padding: 4px 8px; font-size: 0.65em; min-height: 26px; min-width: 30px; }
             .campionato-title-wrapper .title { font-size: 1.4em; }
-            
-            /* Classifiche compatte per mobile - senza scroll orizzontale */
-            .rankings-container {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            .ranking-box {
-                padding: 12px;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-            .ranking-table {
-                font-size: 0.7em;
-                min-width: auto;
-                width: 100%;
-            }
-            .ranking-table th,
-            .ranking-table td {
-                padding: 4px 6px;
-                font-size: 0.65em;
-                white-space: nowrap;
-            }
-            .ranking-table th:first-child,
-            .ranking-table td:first-child {
-                padding-left: 4px;
-            }
-            .ranking-table th:last-child,
-            .ranking-table td:last-child {
-                padding-right: 4px;
-            }
-            .ranking-avatar {
-                width: 24px;
-                height: 24px;
-                margin-right: 4px;
-            }
-            .ranking-player-cell {
-                gap: 4px;
-                font-size: 0.7em;
-            }
-            .ranking-team-cell {
-                gap: 4px;
-                font-size: 0.7em;
-            }
-            .ranking-team-cell img {
-                width: 20px;
-                height: 20px;
-            }
-            /* Nascondi colonne meno importanti su mobile */
-            .ranking-table th:nth-child(4),
-            .ranking-table td:nth-child(4),
-            .ranking-table th:nth-child(5),
-            .ranking-table td:nth-child(5),
-            .ranking-table th:nth-child(6),
-            .ranking-table td:nth-child(6) {
-                display: none;
-            }
         }
-        
         @media (max-width: 400px) {
             .user-bar-inline .username { max-width: 50px; font-size: 0.9em; }
             .user-bar-inline button { padding: 3px 6px; font-size: 0.55em; min-height: 22px; }
             .campionato-title-wrapper .title { font-size: 1.2em; }
-            .ranking-table {
-                font-size: 0.6em;
-            }
-            .ranking-table th,
-            .ranking-table td {
-                padding: 2px 4px;
-                font-size: 0.55em;
-            }
-            .ranking-avatar {
-                width: 20px;
-                height: 20px;
-            }
         }
         
         .tabs { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; justify-content: center; }
@@ -345,8 +275,6 @@
         .match-actions {
             display: flex;
             gap: 5px;
-            flex-wrap: wrap;
-            align-items: center;
         }
         .match-actions button { 
             background: none; 
@@ -450,7 +378,59 @@
         #cropLogoImage { max-width: 100%; max-height: 50vh; }
         
         @media (max-width: 768px) { 
-            .rankings-container { grid-template-columns: 1fr; } 
+            .rankings-container { 
+                grid-template-columns: 1fr; 
+                gap: 15px;
+            }
+            
+            .ranking-box { 
+                padding: 12px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .ranking-table { 
+                font-size: 0.9em; 
+                min-width: auto;
+                width: 100%;
+            }
+            
+            .ranking-table th, 
+            .ranking-table td { 
+                padding: 8px 6px; 
+                font-size: 0.85em;
+                white-space: nowrap;
+            }
+            
+            .ranking-table th:first-child,
+            .ranking-table td:first-child {
+                padding-left: 4px;
+            }
+            
+            .ranking-table th:last-child,
+            .ranking-table td:last-child {
+                padding-right: 4px;
+            }
+            
+            .ranking-avatar { 
+                width: 30px; 
+                height: 30px; 
+                margin-right: 4px;
+            }
+            
+            .ranking-box {
+                overflow-x: auto;
+            }
+            
+            .ranking-box::-webkit-scrollbar {
+                height: 4px;
+            }
+            
+            .ranking-box::-webkit-scrollbar-thumb {
+                background: #2ecc71;
+                border-radius: 4px;
+            }
+            
             .tab-btn { padding: 10px 16px; font-size: 0.9em; } 
             .header h1 { font-size: 1.8em; } 
             .summary-content { width: 95%; } 
@@ -471,7 +451,6 @@
             .match-teams .match-score-center { font-size: 1.1em; padding: 3px 12px; min-width: 55px; }
             .match-teams .team-name img { width: 24px; height: 24px; }
             .player-avatar { width: 60px; height: 60px; }
-            .ranking-avatar { width: 45px; height: 45px; }
             .player-stats { font-size: 0.75em; gap: 5px; }
             .player-stats span { padding: 1px 5px; font-size: 0.8em; }
         }
@@ -485,9 +464,15 @@
             .match-teams .team-name img { width: 20px; height: 20px; }
             .campionato-title-wrapper .title { font-size: 1em; }
             .player-avatar { width: 50px; height: 50px; }
-            .ranking-avatar { width: 38px; height: 38px; }
+            .ranking-avatar { width: 28px; height: 28px; }
             .player-stats { font-size: 0.65em; gap: 3px; }
             .player-stats span { padding: 1px 4px; font-size: 0.7em; }
+            
+            .ranking-table { font-size: 0.8em; }
+            .ranking-table th, .ranking-table td { 
+                padding: 4px 3px; 
+                font-size: 0.75em;
+            }
         }
     </style>
 </head>
@@ -592,8 +577,17 @@
                 <div class="matches-title">
                     <h2><i class="fas fa-history"></i> Partite Registrate</h2>
                     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
-                        <button onclick="showShareMenu('partite')" style="background:#2ecc71; padding:8px 16px; font-size:0.8em;">
-                            <i class="fas fa-share-alt"></i> Condividi Tutte
+                        <button onclick="shareContent('partite')" style="background:#25D366; padding:6px 14px; font-size:0.75em;">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </button>
+                        <button onclick="shareContentAsImage('partite')" style="background:#FF6B6B; padding:6px 14px; font-size:0.75em;">
+                            <i class="fas fa-image"></i> Immagine
+                        </button>
+                        <button onclick="shareContent('partite')" style="background:#FF6600; padding:6px 14px; font-size:0.75em;">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                        <button onclick="shareContent('partite')" style="background:#0088CC; padding:6px 14px; font-size:0.75em;">
+                            <i class="fas fa-copy"></i> Copia
                         </button>
                     </div>
                 </div>
@@ -679,8 +673,17 @@
             <div id="classifiche" class="panel">
                 <h2><i class="fas fa-trophy"></i> Classifiche Complete</h2>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:15px;">
-                    <button onclick="showShareMenu('classifiche')" style="background:#2ecc71; padding:10px 20px; font-size:0.9em;">
-                        <i class="fas fa-share-alt"></i> Condividi Classifiche
+                    <button onclick="shareContent('classifiche')" style="background:#25D366; padding:8px 16px; font-size:0.8em;">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </button>
+                    <button onclick="shareContentAsImage('classifiche')" style="background:#FF6B6B; padding:8px 16px; font-size:0.8em;">
+                        <i class="fas fa-image"></i> Immagine
+                    </button>
+                    <button onclick="shareContent('classifiche')" style="background:#FF6600; padding:8px 16px; font-size:0.8em;">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                    <button onclick="shareContent('classifiche')" style="background:#0088CC; padding:8px 16px; font-size:0.8em;">
+                        <i class="fas fa-copy"></i> Copia
                     </button>
                 </div>
                 <div class="rankings-container">
@@ -697,8 +700,17 @@
             <div id="statistiche" class="panel">
                 <h2><i class="fas fa-chart-pie"></i> Statistiche Generali</h2>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:15px;">
-                    <button onclick="showShareMenu('statistiche')" style="background:#2ecc71; padding:10px 20px; font-size:0.9em;">
-                        <i class="fas fa-share-alt"></i> Condividi Statistiche
+                    <button onclick="shareContent('statistiche')" style="background:#25D366; padding:8px 16px; font-size:0.8em;">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </button>
+                    <button onclick="shareContentAsImage('statistiche')" style="background:#FF6B6B; padding:8px 16px; font-size:0.8em;">
+                        <i class="fas fa-image"></i> Immagine
+                    </button>
+                    <button onclick="shareContent('statistiche')" style="background:#FF6600; padding:8px 16px; font-size:0.8em;">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                    <button onclick="shareContent('statistiche')" style="background:#0088CC; padding:8px 16px; font-size:0.8em;">
+                        <i class="fas fa-copy"></i> Copia
                     </button>
                 </div>
                 <div id="generalStats" class="stats-grid"></div>
@@ -1497,7 +1509,7 @@
                     ${p.photo ? `<img class="player-avatar" src="${p.photo}">` : `<div class="player-avatar" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2ecc71,#27ae60);color:white;font-size:24px;"><i class="fas fa-user"></i></div>`}
                     <div class="player-info">
                         <h3><strong>${escapeHtml(p.name)}</strong> 
-                            <span class="badge">${p.isGoalkeeper ? '<i class="fas fa-hand-paper hand-icon"></i>' : '<i class="fas fa-shirt jersey-icon"></i>'} ${p.number}</span> 
+                            <span class="badge"><i class="fas fa-shirt jersey-icon"></i> ${p.number}</span> 
                             ${p.isGoalkeeper ? '<span class="badge"><i class="fas fa-hand-paper hand-icon"></i> Portiere</span>' : '<span class="badge"><i class="fas fa-futbol"></i> Calciatore</span>'}
                         </h3>
                         <div class="player-stats">
@@ -1525,340 +1537,6 @@
         function getTeamPlayersList(teamIds) { if (!teamIds || teamIds.length === 0) return ''; let html = '<div class="team-players-list">'; for (let id of teamIds) { const p = players.find(p => p.id === id); if (p) html += `<span class="player-tag"><i class="fas fa-user"></i> ${escapeHtml(p.name)}${p.isGoalkeeper ? ' <i class="fas fa-hand-paper hand-icon" style="font-size:0.8em;"></i>' : ''}</span>`; } html += '</div>'; return html; }
         
         function formatGoalsList(goals) { if (!goals || goals.length === 0) return '<span style="color:#999;">Nessun goal</span>'; const counts = {}; for (let g of goals) { const p = players.find(p => p.id === g.playerId); if (p) { const key = `${p.id}_${g.isOwnGoal}`; if (!counts[key]) counts[key] = { name: p.name, count: 0, isOwnGoal: g.isOwnGoal }; counts[key].count++; } } let html = '<div class="match-goals-list">'; for (let g of Object.values(counts)) { if (g.isOwnGoal) html += `<span class="own-goal-badge"><i class="fas fa-futbol"></i> ${escapeHtml(g.name)}: ${g.count} <span style="background:#c0392b;padding:2px 6px;border-radius:12px;">AUTOGOL</span></span>`; else html += `<span class="goal-badge"><i class="fas fa-futbol"></i> ${escapeHtml(g.name)}: ${g.count}</span>`; } html += '</div>'; return html; }
-        
-        // ========== CONDIVISIONE ==========
-        function showShareMenu(type, matchId) {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.style.display = 'flex';
-            modal.id = 'shareMenuModal';
-            
-            let title = '';
-            switch(type) {
-                case 'classifiche': title = '🏆 Classifiche'; break;
-                case 'statistiche': title = '📊 Statistiche'; break;
-                case 'partite': title = '📋 Partite'; break;
-                case 'partita_singola': title = '⚽ Partita'; break;
-                default: title = '📋 Condividi';
-            }
-            
-            modal.innerHTML = `
-                <div class="modal-content" style="max-width:500px;">
-                    <div class="modal-header">
-                        <h3><i class="fas fa-share-alt"></i> Condividi ${title}</h3>
-                        <button class="close-modal" onclick="closeShareMenu()"><i class="fas fa-times"></i></button>
-                    </div>
-                    <div style="text-align:center; padding:10px 0;">
-                        <p style="margin-bottom:15px; color:#666;">Scegli come condividere</p>
-                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
-                            <button onclick="shareVia('whatsapp', '${type}', ${matchId || 'null'})" style="background:#25D366; padding:12px; font-size:0.8em; border-radius:12px; flex-direction:column;">
-                                <i class="fab fa-whatsapp" style="font-size:1.5em; display:block;"></i> WhatsApp
-                            </button>
-                            <button onclick="shareVia('twitter', '${type}', ${matchId || 'null'})" style="background:#1DA1F2; padding:12px; font-size:0.8em; border-radius:12px; flex-direction:column;">
-                                <i class="fab fa-twitter" style="font-size:1.5em; display:block;"></i> Twitter
-                            </button>
-                            <button onclick="shareVia('facebook', '${type}', ${matchId || 'null'})" style="background:#4267B2; padding:12px; font-size:0.8em; border-radius:12px; flex-direction:column;">
-                                <i class="fab fa-facebook" style="font-size:1.5em; display:block;"></i> Facebook
-                            </button>
-                            <button onclick="shareVia('telegram', '${type}', ${matchId || 'null'})" style="background:#0088CC; padding:12px; font-size:0.8em; border-radius:12px; flex-direction:column;">
-                                <i class="fab fa-telegram" style="font-size:1.5em; display:block;"></i> Telegram
-                            </button>
-                            <button onclick="shareVia('email', '${type}', ${matchId || 'null'})" style="background:#DB4437; padding:12px; font-size:0.8em; border-radius:12px; flex-direction:column;">
-                                <i class="fas fa-envelope" style="font-size:1.5em; display:block;"></i> Email
-                            </button>
-                            <button onclick="shareVia('pdf', '${type}', ${matchId || 'null'})" style="background:#FF6600; padding:12px; font-size:0.8em; border-radius:12px; flex-direction:column;">
-                                <i class="fas fa-file-pdf" style="font-size:1.5em; display:block;"></i> PDF
-                            </button>
-                            <button onclick="shareVia('copy', '${type}', ${matchId || 'null'})" style="background:#0088CC; padding:12px; font-size:0.8em; border-radius:12px; flex-direction:column;">
-                                <i class="fas fa-copy" style="font-size:1.5em; display:block;"></i> Copia
-                            </button>
-                            <button onclick="shareVia('image', '${type}', ${matchId || 'null'})" style="background:#9B59B6; padding:12px; font-size:0.8em; border-radius:12px; flex-direction:column;">
-                                <i class="fas fa-image" style="font-size:1.5em; display:block;"></i> Immagine
-                            </button>
-                            <button onclick="closeShareMenu()" style="background:#95a5a6; padding:12px; font-size:0.8em; border-radius:12px; flex-direction:column;">
-                                <i class="fas fa-times" style="font-size:1.5em; display:block;"></i> Annulla
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-        }
-
-        function closeShareMenu() {
-            const modal = document.getElementById('shareMenuModal');
-            if (modal) modal.remove();
-        }
-
-        function shareVia(method, type, matchId) {
-            closeShareMenu();
-            
-            let content = '';
-            let title = '';
-            
-            if (matchId) {
-                const match = matches.find(m => m.id === matchId);
-                if (match) {
-                    title = `⚽ Partita: ${match.teamAName} ${match.goalsA} - ${match.goalsB} ${match.teamBName}`;
-                    content = generateSingleMatchText(match);
-                }
-            } else {
-                switch(type) {
-                    case 'classifiche':
-                        title = '🏆 Classifiche Campionato';
-                        content = generateCompleteRankingsText();
-                        break;
-                    case 'statistiche':
-                        title = '📊 Statistiche Campionato';
-                        content = generateCompleteStatsText();
-                        break;
-                    case 'partite':
-                        title = '📋 Tutte le Partite';
-                        content = generateCompleteMatchesText();
-                        break;
-                }
-            }
-            
-            if (method === 'image') {
-                shareAsImage(type, matchId);
-                return;
-            }
-            
-            shareContentVia(method, title, content);
-        }
-
-        function shareContentVia(method, title, content) {
-            const fullContent = title + '\n\n' + content;
-            switch(method) {
-                case 'whatsapp':
-                    window.open(`https://wa.me/?text=${encodeURIComponent(fullContent)}`, '_blank');
-                    break;
-                case 'twitter':
-                    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title + '\n\n' + content.substring(0, 200))}`, '_blank');
-                    break;
-                case 'facebook':
-                    const url = window.location.href;
-                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(title + '\n\n' + content.substring(0, 300))}`, '_blank');
-                    break;
-                case 'telegram':
-                    window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(fullContent)}`, '_blank');
-                    break;
-                case 'email':
-                    window.open(`mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(fullContent)}`, '_blank');
-                    break;
-                case 'pdf':
-                    downloadPDF(title, content);
-                    break;
-                case 'copy':
-                    copyToClipboard(fullContent);
-                    break;
-                default:
-                    showAlert('Metodo non supportato', 'error');
-            }
-        }
-
-        function generateSingleMatchText(match) {
-            let text = `⚽ PARTITA\n`;
-            text += `${match.teamAName} ${match.goalsA} - ${match.goalsB} ${match.teamBName}\n`;
-            text += `📅 Data: ${formatDate(match.date)}\n\n`;
-            
-            text += `🔴 ${match.teamAName}\n`;
-            match.teamA.forEach(id => {
-                const p = players.find(p => p.id === id);
-                if (p) text += `  • ${p.name}${p.isGoalkeeper ? ' 🧤' : ''}\n`;
-            });
-            if (match.goalsDetailA && match.goalsDetailA.length > 0) {
-                text += `⚽ Goal: `;
-                const goals = match.goalsDetailA.map(g => {
-                    const scorer = players.find(p => p.id === g.playerId);
-                    return scorer ? `${scorer.name}${g.isOwnGoal ? ' (autorete)' : ''}` : '?';
-                });
-                text += goals.join(', ') + '\n';
-            }
-            
-            text += `\n🔵 ${match.teamBName}\n`;
-            match.teamB.forEach(id => {
-                const p = players.find(p => p.id === id);
-                if (p) text += `  • ${p.name}${p.isGoalkeeper ? ' 🧤' : ''}\n`;
-            });
-            if (match.goalsDetailB && match.goalsDetailB.length > 0) {
-                text += `⚽ Goal: `;
-                const goals = match.goalsDetailB.map(g => {
-                    const scorer = players.find(p => p.id === g.playerId);
-                    return scorer ? `${scorer.name}${g.isOwnGoal ? ' (autorete)' : ''}` : '?';
-                });
-                text += goals.join(', ') + '\n';
-            }
-            
-            const mvp = players.find(p => p.id === match.mvp);
-            if (mvp) text += `\n⭐ MVP: ${mvp.name}\n`;
-            const gk = players.find(p => p.id === match.bestGoalkeeper);
-            if (gk) text += `🧤 Miglior Portiere: ${gk.name}\n`;
-            
-            return text;
-        }
-
-        function shareAsImage(type, matchId) {
-            const container = document.createElement('div');
-            container.style.cssText = `
-                position: fixed;
-                top: -9999px;
-                left: 0;
-                width: 800px;
-                padding: 40px;
-                background: linear-gradient(135deg, #1a472a, #2d6a4f);
-                color: white;
-                font-family: 'Inter', sans-serif;
-                z-index: 9999;
-            `;
-            
-            let content = '';
-            if (matchId) {
-                const match = matches.find(m => m.id === matchId);
-                if (match) content = generateSingleMatchHTML(match);
-            } else if (type === 'classifiche') {
-                content = generateRankingsHTML();
-            } else if (type === 'statistiche') {
-                content = generateStatsHTML();
-            } else {
-                content = generateMatchesHTML();
-            }
-            
-            container.innerHTML = `
-                <div style="text-align:center; margin-bottom:20px;">
-                    <h1 style="font-size:28px; color:#2ecc71;">⚽ Calcetto Manager Pro</h1>
-                    <p style="font-size:14px; opacity:0.7;">${currentCampionatoNome || 'Campionato'}</p>
-                    <p style="font-size:12px; opacity:0.5;">${new Date().toLocaleDateString('it-IT')}</p>
-                </div>
-                ${content}
-                <div style="text-align:center; margin-top:20px; font-size:10px; opacity:0.4;">
-                    Generato da Calcetto Manager Pro
-                </div>
-            `;
-            
-            document.body.appendChild(container);
-            
-            html2canvas(container, {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: null
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `condivisione_${type}_${Date.now()}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                container.remove();
-                showAlert('✅ Immagine generata e scaricata!', 'success');
-            }).catch(err => {
-                console.error(err);
-                container.remove();
-                showAlert('❌ Errore nella generazione dell\'immagine', 'error');
-            });
-        }
-
-        function generateSingleMatchHTML(match) {
-            const mvp = players.find(p => p.id === match.mvp);
-            const gk = players.find(p => p.id === match.bestGoalkeeper);
-            
-            let html = `
-                <div style="background:rgba(255,255,255,0.1); border-radius:12px; padding:20px; margin-bottom:15px;">
-                    <div style="text-align:center; font-size:24px; font-weight:bold; margin-bottom:15px;">
-                        ${match.teamAName} ${match.goalsA} - ${match.goalsB} ${match.teamBName}
-                    </div>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-                        <div>
-                            <h3 style="color:#e74c3c; font-size:16px;">🔴 ${match.teamAName}</h3>
-                            ${match.teamA.map(id => {
-                                const p = players.find(p => p.id === id);
-                                return p ? `<div style="padding:3px 0; font-size:13px;">${p.photo ? `<img src="${p.photo}" style="width:24px;height:24px;border-radius:50%;vertical-align:middle;margin-right:8px;">` : ''}• ${p.name}${p.isGoalkeeper ? ' 🧤' : ''}</div>` : '';
-                            }).join('')}
-                            ${match.goalsDetailA && match.goalsDetailA.length > 0 ? `
-                                <div style="margin-top:8px; font-size:13px; color:#2ecc71;">
-                                    ⚽ ${match.goalsDetailA.map(g => {
-                                        const s = players.find(p => p.id === g.playerId);
-                                        return s ? `${s.name}${g.isOwnGoal ? ' (autorete)' : ''}` : '?';
-                                    }).join(', ')}
-                                </div>
-                            ` : ''}
-                        </div>
-                        <div>
-                            <h3 style="color:#3498db; font-size:16px;">🔵 ${match.teamBName}</h3>
-                            ${match.teamB.map(id => {
-                                const p = players.find(p => p.id === id);
-                                return p ? `<div style="padding:3px 0; font-size:13px;">${p.photo ? `<img src="${p.photo}" style="width:24px;height:24px;border-radius:50%;vertical-align:middle;margin-right:8px;">` : ''}• ${p.name}${p.isGoalkeeper ? ' 🧤' : ''}</div>` : '';
-                            }).join('')}
-                            ${match.goalsDetailB && match.goalsDetailB.length > 0 ? `
-                                <div style="margin-top:8px; font-size:13px; color:#2ecc71;">
-                                    ⚽ ${match.goalsDetailB.map(g => {
-                                        const s = players.find(p => p.id === g.playerId);
-                                        return s ? `${s.name}${g.isOwnGoal ? ' (autorete)' : ''}` : '?';
-                                    }).join(', ')}
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                    <div style="margin-top:15px; font-size:13px; text-align:center; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
-                        📅 ${formatDate(match.date)}
-                        ${mvp ? ` | ⭐ MVP: ${mvp.name}` : ''}
-                        ${gk ? ` | 🧤 Miglior Portiere: ${gk.name}` : ''}
-                    </div>
-                </div>
-            `;
-            return html;
-        }
-
-        function generateRankingsHTML() {
-            let html = '<div style="font-size:14px;">';
-            html += '<div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:10px; margin-bottom:10px;">';
-            html += '<h3 style="color:#2ecc71;">🏆 Classifica Squadre</h3>';
-            const teamRows = document.querySelectorAll('#teamRanking .ranking-table tbody tr');
-            teamRows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells.length >= 3) {
-                    html += `<div>${cells[0].textContent}. ${cells[1].textContent.trim()} - ${cells[2].textContent} pt</div>`;
-                }
-            });
-            html += '</div>';
-            
-            html += '<div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:10px; margin-bottom:10px;">';
-            html += '<h3 style="color:#2ecc71;">⚽ Capocannonieri</h3>';
-            const scorerRows = document.querySelectorAll('#topScorersRanking .ranking-table tbody tr');
-            scorerRows.slice(0, 5).forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells.length >= 3) {
-                    html += `<div>${cells[0].textContent}. ${cells[1].textContent.trim()} - ${cells[2].textContent} gol</div>`;
-                }
-            });
-            html += '</div>';
-            html += '</div>';
-            return html;
-        }
-
-        function generateStatsHTML() {
-            let html = '<div style="font-size:14px;">';
-            html += `<div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:10px;">`;
-            html += `<p>📈 Partite: ${matches.length}</p>`;
-            html += `<p>👤 Giocatori: ${players.length}</p>`;
-            let totalGoals = 0;
-            matches.forEach(m => totalGoals += m.goalsA + m.goalsB);
-            html += `<p>⚽ Goal totali: ${totalGoals}</p>`;
-            html += '</div>';
-            html += '</div>';
-            return html;
-        }
-
-        function generateMatchesHTML() {
-            let html = '<div style="font-size:13px;">';
-            matches.slice(-5).reverse().forEach(m => {
-                html += `<div style="background:rgba(255,255,255,0.1); padding:10px; border-radius:8px; margin-bottom:8px;">`;
-                html += `<strong>${m.teamAName} ${m.goalsA} - ${m.goalsB} ${m.teamBName}</strong>`;
-                html += `<div style="font-size:11px; opacity:0.7;">📅 ${formatDate(m.date)}</div>`;
-                html += '</div>';
-            });
-            html += '</div>';
-            return html;
-        }
         
         function updateMatchesList() { 
             const container = document.getElementById('matchesList'); 
@@ -1893,9 +1571,6 @@
                             </span>
                         </div>
                         <div class="match-actions">
-                            <button onclick="showShareMenu('partita_singola', ${m.id})" style="background:#2ecc71; color:white; padding:5px 10px; border-radius:8px; font-size:0.7em;">
-                                <i class="fas fa-share-alt"></i>
-                            </button>
                             <button class="edit-btn" onclick="editMatch(${m.id})" ${!isAdminMode?'disabled':''}><i class="fas fa-edit"></i></button>
                             <button class="delete-match-btn" onclick="deleteMatch(${m.id})" ${!isAdminMode?'disabled':''}><i class="fas fa-trash-alt"></i></button>
                         </div>
@@ -2563,6 +2238,466 @@
             } 
         }
         function closeEditModal() { document.getElementById('editMatchModal').style.display = 'none'; editingMatchId = null; }
+        
+        // ========== FUNZIONI DI CONDIVISIONE ==========
+        function shareContent(type) {
+            let title = '';
+            let content = '';
+            
+            switch(type) {
+                case 'classifiche':
+                    title = '🏆 CLASSIFICHE COMPLETE CAMPIONATO';
+                    content = generateCompleteRankingsText();
+                    break;
+                case 'statistiche':
+                    title = '📊 STATISTICHE COMPLETE CAMPIONATO';
+                    content = generateCompleteStatsText();
+                    break;
+                case 'partite':
+                    title = '📋 TUTTE LE PARTITE REGISTRATE';
+                    content = generateCompleteMatchesText();
+                    break;
+                default:
+                    title = '📋 DATI COMPLETI CAMPIONATO';
+                    content = generateCompleteAllDataText();
+            }
+            
+            showShareModal(title, content);
+        }
+
+        function shareContentAsImage(type) {
+            let title = '';
+            let content = '';
+            
+            switch(type) {
+                case 'classifiche':
+                    title = '🏆 CLASSIFICHE COMPLETE CAMPIONATO';
+                    content = generateCompleteRankingsText();
+                    break;
+                case 'statistiche':
+                    title = '📊 STATISTICHE COMPLETE CAMPIONATO';
+                    content = generateCompleteStatsText();
+                    break;
+                case 'partite':
+                    title = '📋 TUTTE LE PARTITE REGISTRATE';
+                    content = generateCompleteMatchesText();
+                    break;
+                default:
+                    title = '📋 DATI COMPLETI CAMPIONATO';
+                    content = generateCompleteAllDataText();
+            }
+            
+            shareAsImage(title, content);
+        }
+
+        function generateCompleteRankingsText() {
+            let text = `🏆 CLASSIFICA COMPLETA CAMPIONATO\n`;
+            text += `📅 ${new Date().toLocaleDateString('it-IT')}\n`;
+            text += `🏟️ ${currentCampionatoNome || 'Campionato'}\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            
+            // 1. CLASSIFICA SQUADRE
+            text += `🔴 CLASSIFICA SQUADRE\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            const teamRows = document.querySelectorAll('#teamRanking .ranking-table tbody tr');
+            if (teamRows.length === 0) {
+                text += `Nessuna partita disputata\n`;
+            } else {
+                teamRows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 10) {
+                        const pos = cells[0].textContent.trim();
+                        const squadra = cells[1].textContent.trim();
+                        const punti = cells[2].textContent.trim();
+                        const g = cells[3].textContent.trim();
+                        const v = cells[4].textContent.trim();
+                        const n = cells[5].textContent.trim();
+                        const p = cells[6].textContent.trim();
+                        const gf = cells[7].textContent.trim();
+                        const gs = cells[8].textContent.trim();
+                        const diff = cells[9].textContent.trim();
+                        text += `${pos}. ${squadra} - ${punti} pt  (G:${g} V:${v} N:${n} P:${p} GF:${gf} GS:${gs} Diff:${diff})\n`;
+                    }
+                });
+            }
+            
+            // 2. CLASSIFICA GENERALE GIOCATORI
+            text += `\n📊 CLASSIFICA GENERALE GIOCATORI\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            const generalRows = document.querySelectorAll('#generalRanking .ranking-table tbody tr');
+            if (generalRows.length === 0) {
+                text += `Nessun giocatore\n`;
+            } else {
+                generalRows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 7) {
+                        const pos = cells[0].textContent.trim();
+                        const giocatore = cells[1].textContent.trim();
+                        const punti = cells[2].textContent.trim();
+                        const g = cells[3].textContent.trim();
+                        const v = cells[4].textContent.trim();
+                        const n = cells[5].textContent.trim();
+                        const p = cells[6].textContent.trim();
+                        text += `${pos}. ${giocatore} - ${punti} pt  (G:${g} V:${v} N:${n} P:${p})\n`;
+                    }
+                });
+            }
+            
+            // 3. CAPOCANNONIERI
+            text += `\n⚽ CAPOCANNONIERI\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            const scorerRows = document.querySelectorAll('#topScorersRanking .ranking-table tbody tr');
+            if (scorerRows.length === 0) {
+                text += `Nessun goal segnato\n`;
+            } else {
+                scorerRows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 5) {
+                        const pos = cells[0].textContent.trim();
+                        const giocatore = cells[1].textContent.trim();
+                        const goal = cells[2].textContent.trim();
+                        const partite = cells[3].textContent.trim();
+                        const media = cells[4].textContent.trim();
+                        text += `${pos}. ${giocatore} - ${goal} goal (${partite} partite, media ${media})\n`;
+                    }
+                });
+            }
+            
+            // 4. ASSIST
+            text += `\n🎯 CLASSIFICA ASSIST\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            const assistRows = document.querySelectorAll('#assistsRanking .ranking-table tbody tr');
+            if (assistRows.length === 0) {
+                text += `Nessun assist\n`;
+            } else {
+                assistRows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 5) {
+                        const pos = cells[0].textContent.trim();
+                        const giocatore = cells[1].textContent.trim();
+                        const assist = cells[2].textContent.trim();
+                        const partite = cells[3].textContent.trim();
+                        const media = cells[4].textContent.trim();
+                        text += `${pos}. ${giocatore} - ${assist} assist (${partite} partite, media ${media})\n`;
+                    }
+                });
+            }
+            
+            // 5. CLASSIFICA PORTIERI
+            text += `\n🧤 CLASSIFICA PORTIERI (media gol subiti)\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            const gkRows = document.querySelectorAll('#goalkeepersStatsRanking .ranking-table tbody tr');
+            if (gkRows.length === 0) {
+                text += `Nessun portiere ha giocato\n`;
+            } else {
+                gkRows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 6) {
+                        const pos = cells[0].textContent.trim();
+                        const portiere = cells[1].textContent.trim();
+                        const partite = cells[2].textContent.trim();
+                        const golSubiti = cells[3].textContent.trim();
+                        const media = cells[4].textContent.trim();
+                        const clean = cells[5].textContent.trim();
+                        text += `${pos}. ${portiere} - ${partite} partite, ${golSubiti} gol subiti, media ${media}, ${clean} clean sheet\n`;
+                    }
+                });
+            }
+            
+            // 6. MVP
+            text += `\n⭐ MIGLIOR GIOCATORE (MVP)\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            const mvpRows = document.querySelectorAll('#mvpRanking .ranking-table tbody tr');
+            if (mvpRows.length === 0) {
+                text += `Nessun MVP assegnato\n`;
+            } else {
+                mvpRows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 5) {
+                        const pos = cells[0].textContent.trim();
+                        const giocatore = cells[1].textContent.trim();
+                        const mvp = cells[2].textContent.trim();
+                        const partite = cells[3].textContent.trim();
+                        const media = cells[4].textContent.trim();
+                        text += `${pos}. ${giocatore} - ${mvp} MVP (${partite} partite, media ${media})\n`;
+                    }
+                });
+            }
+            
+            // 7. PREMIO MIGLIOR PORTIERE
+            text += `\n🏅 PREMIO MIGLIOR PORTIERE\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            const bestGkRows = document.querySelectorAll('#bestGoalkeeperRanking .ranking-table tbody tr');
+            if (bestGkRows.length === 0) {
+                text += `Nessun premio assegnato\n`;
+            } else {
+                bestGkRows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 5) {
+                        const pos = cells[0].textContent.trim();
+                        const portiere = cells[1].textContent.trim();
+                        const premi = cells[2].textContent.trim();
+                        const partite = cells[3].textContent.trim();
+                        const media = cells[4].textContent.trim();
+                        text += `${pos}. ${portiere} - ${premi} premi (${partite} partite, media ${media})\n`;
+                    }
+                });
+            }
+            
+            return text;
+        }
+
+        function generateCompleteStatsText() {
+            let text = `📊 STATISTICHE COMPLETE CAMPIONATO\n`;
+            text += `📅 ${new Date().toLocaleDateString('it-IT')}\n`;
+            text += `🏟️ ${currentCampionatoNome || 'Campionato'}\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            
+            text += `📈 DATI GENERALI\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            text += `Partite disputate: ${matches.length}\n`;
+            text += `Giocatori totali: ${players.length}\n`;
+            
+            let totalGoals = 0, totalAssists = 0, totalOwn = 0;
+            matches.forEach(m => {
+                totalGoals += m.goalsA + m.goalsB;
+                if (m.goalsDetailA) m.goalsDetailA.forEach(g => { if (g.assistId) totalAssists++; if (g.isOwnGoal) totalOwn++; });
+                if (m.goalsDetailB) m.goalsDetailB.forEach(g => { if (g.assistId) totalAssists++; if (g.isOwnGoal) totalOwn++; });
+            });
+            text += `Goal totali: ${totalGoals}\n`;
+            text += `Assist totali: ${totalAssists}\n`;
+            text += `Autoreti totali: ${totalOwn}\n`;
+            
+            text += `\n🏆 PREMI SPECIALI\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            if (players.length > 0) {
+                const bestScorer = players.reduce((a,b) => a.goalsScored > b.goalsScored ? a : b);
+                const bestAssist = players.reduce((a,b) => a.assists > b.assists ? a : b);
+                const bestMVP = players.reduce((a,b) => a.mvpAwards > b.mvpAwards ? a : b);
+                const bestGK = players.reduce((a,b) => a.bestGoalkeeperAwards > b.bestGoalkeeperAwards ? a : b);
+                text += `⚽ Miglior marcatore: ${bestScorer.name} (${bestScorer.goalsScored} gol)\n`;
+                text += `🎯 Miglior assistman: ${bestAssist.name} (${bestAssist.assists} assist)\n`;
+                text += `⭐ Miglior MVP: ${bestMVP.name} (${bestMVP.mvpAwards} MVP)\n`;
+                text += `🧤 Miglior Portiere: ${bestGK.name} (${bestGK.bestGoalkeeperAwards} premi)\n`;
+            } else {
+                text += `Nessun giocatore\n`;
+            }
+            
+            return text;
+        }
+
+        function generateCompleteMatchesText() {
+            let text = `📋 TUTTE LE PARTITE REGISTRATE\n`;
+            text += `📅 ${new Date().toLocaleDateString('it-IT')}\n`;
+            text += `🏟️ ${currentCampionatoNome || 'Campionato'}\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            
+            if (matches.length === 0) {
+                text += `Nessuna partita registrata\n`;
+            } else {
+                matches.slice().reverse().forEach((m, index) => {
+                    const num = matches.length - index;
+                    text += `⚽ PARTITA ${num}\n`;
+                    text += `${m.teamAName} ${m.goalsA} - ${m.goalsB} ${m.teamBName}\n`;
+                    text += `📅 Data: ${formatDate(m.date)}\n`;
+                    const mvp = players.find(p => p.id === m.mvp);
+                    if (mvp) text += `⭐ MVP: ${mvp.name}\n`;
+                    const gk = players.find(p => p.id === m.bestGoalkeeper);
+                    if (gk) text += `🧤 Miglior Portiere: ${gk.name}\n`;
+                    
+                    if (m.goalsDetailA && m.goalsDetailA.length > 0) {
+                        text += `⚽ Goal ${m.teamAName}: `;
+                        const goalsA = m.goalsDetailA.map(g => {
+                            const scorer = players.find(p => p.id === g.playerId);
+                            return scorer ? `${scorer.name}${g.isOwnGoal ? ' (autorete)' : ''}` : '?';
+                        });
+                        text += goalsA.join(', ') + '\n';
+                    }
+                    if (m.goalsDetailB && m.goalsDetailB.length > 0) {
+                        text += `⚽ Goal ${m.teamBName}: `;
+                        const goalsB = m.goalsDetailB.map(g => {
+                            const scorer = players.find(p => p.id === g.playerId);
+                            return scorer ? `${scorer.name}${g.isOwnGoal ? ' (autorete)' : ''}` : '?';
+                        });
+                        text += goalsB.join(', ') + '\n';
+                    }
+                    text += `━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                });
+            }
+            
+            return text;
+        }
+
+        function generateCompleteAllDataText() {
+            return generateCompleteRankingsText() + '\n\n' + generateCompleteStatsText();
+        }
+
+        function showShareModal(title, content) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            modal.id = 'shareModal';
+            
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width:700px;">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-share-alt"></i> ${title}</h3>
+                        <button class="close-modal" onclick="closeShareModal()"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div style="background:rgba(248,249,250,0.8); padding:15px; border-radius:12px; max-height:450px; overflow-y:auto; white-space:pre-wrap; font-size:0.85em; font-family:monospace; line-height:1.6;">
+                        ${content}
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:15px;">
+                        <button onclick="shareOnWhatsApp('${encodeURIComponent(content)}')" style="flex:1; background:#25D366; padding:10px 16px; font-size:0.85em;">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </button>
+                        <button onclick="shareAsImage('${encodeURIComponent(title)}', '${encodeURIComponent(content)}')" style="flex:1; background:#FF6B6B; padding:10px 16px; font-size:0.85em;">
+                            <i class="fas fa-image"></i> Immagine
+                        </button>
+                        <button onclick="downloadPDF('${encodeURIComponent(title)}', '${encodeURIComponent(content)}')" style="flex:1; background:#FF6600; padding:10px 16px; font-size:0.85em;">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                        <button onclick="copyToClipboard('${encodeURIComponent(content)}')" style="flex:1; background:#0088CC; padding:10px 16px; font-size:0.85em;">
+                            <i class="fas fa-copy"></i> Copia
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function closeShareModal() {
+            const modal = document.getElementById('shareModal');
+            if (modal) modal.remove();
+        }
+
+        function shareOnWhatsApp(text) {
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+
+        function shareAsImage(title, content) {
+            const container = document.createElement('div');
+            container.style.cssText = `
+                position: fixed;
+                top: -9999px;
+                left: -9999px;
+                width: 600px;
+                padding: 30px;
+                background: white;
+                font-family: 'Inter', sans-serif;
+                border-radius: 16px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            `;
+            container.innerHTML = `
+                <div style="text-align:center; margin-bottom:20px;">
+                    <h2 style="color:#2ecc71; font-size:24px;">⚽ ${decodeURIComponent(title)}</h2>
+                    <p style="color:#666; font-size:14px;">📅 ${new Date().toLocaleDateString('it-IT')}</p>
+                </div>
+                <pre style="white-space:pre-wrap; font-size:12px; line-height:1.6; font-family:'Courier New',monospace; background:#f8f9fa; padding:15px; border-radius:8px;">${decodeURIComponent(content)}</pre>
+                <div style="text-align:center; margin-top:20px; color:#999; font-size:11px; border-top:1px solid #eee; padding-top:10px;">
+                    Calcetto Manager Pro
+                </div>
+            `;
+            document.body.appendChild(container);
+            
+            if (typeof html2canvas !== 'undefined') {
+                html2canvas(container).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `${decodeURIComponent(title).replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    document.body.removeChild(container);
+                    closeShareModal();
+                    showAlert('📸 Immagine scaricata!', 'success');
+                }).catch(() => {
+                    document.body.removeChild(container);
+                    showAlert('⚠️ Errore nella generazione dell\'immagine. Usa PDF o Copia.', 'error');
+                });
+            } else {
+                const script = document.createElement('script');
+                script.src = 'https://html2canvas.hertzen.com/dist/html2canvas.min.js';
+                script.onload = function() {
+                    shareAsImage(title, content);
+                };
+                document.head.appendChild(script);
+                document.body.removeChild(container);
+            }
+        }
+
+        function downloadPDF(title, content) {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>${decodeURIComponent(title)}</title>
+                    <style>
+                        body { font-family: 'Courier New', monospace; padding: 40px; max-width: 900px; margin: 0 auto; }
+                        pre { white-space: pre-wrap; font-size: 12px; line-height: 1.6; }
+                        .header { text-align: center; margin-bottom: 30px; }
+                        .header h1 { color: #2ecc71; font-size: 24px; }
+                        .footer { margin-top: 30px; text-align: center; color: #999; font-size: 11px; border-top: 1px solid #eee; padding-top: 15px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>⚽ Calcetto Manager Pro</h1>
+                        <p><strong>${decodeURIComponent(title)}</strong></p>
+                        <p>📅 ${new Date().toLocaleDateString('it-IT')}</p>
+                    </div>
+                    <pre>${decodeURIComponent(content)}</pre>
+                    <div class="footer">Generato da Calcetto Manager Pro</div>
+                    <script>
+                        window.onload = function() { window.print(); }
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        function copyToClipboard(text) {
+            const decodedText = decodeURIComponent(text);
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(decodedText).then(() => {
+                    showAlert('📋 Testo copiato negli appunti!', 'success');
+                    closeShareModal();
+                }).catch(() => {
+                    fallbackCopy(decodedText);
+                });
+            } else {
+                fallbackCopy(decodedText);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.top = '-9999px';
+            textarea.style.left = '-9999px';
+            textarea.style.width = '100%';
+            textarea.style.height = '100%';
+            textarea.style.zIndex = '9999';
+            document.body.appendChild(textarea);
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            
+            try {
+                const success = document.execCommand('copy');
+                if (success) {
+                    showAlert('📋 Testo copiato negli appunti!', 'success');
+                    closeShareModal();
+                } else {
+                    showAlert('⚠️ Non è stato possibile copiare. Seleziona il testo manualmente.', 'error');
+                }
+            } catch (err) {
+                showAlert('⚠️ Non è stato possibile copiare. Seleziona il testo manualmente.', 'error');
+            }
+            
+            document.body.removeChild(textarea);
+        }
         
         // ========== CLASSIFICHE CON FOTO GIOCATORI E LOGO SQUADRE ==========
         function getPlayerAvatarHtml(player, size) {
