@@ -194,7 +194,6 @@
             object-fit: cover;
             border: 3px solid white;
         }
-        /* FIX 16: Cerchio portiere giallo nelle statistiche */
         .big-avatar-wrapper .gk-badge {
             position: absolute;
             bottom: -2px;
@@ -993,49 +992,6 @@
                 justify-content: center;
             }
             
-            /* FIX 21: Allineamento scheda Partite su mobile - centrata */
-            .panel#partite {
-                padding: 15px;
-                overflow: hidden;
-                overflow-x: hidden !important;
-                overflow-y: auto !important;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                width: 100%;
-            }
-            .panel#partite .matches-list {
-                width: 100%;
-                max-width: 100%;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-            .panel#partite .match-card {
-                width: 100%;
-                max-width: 100%;
-                margin: 0 0 15px 0;
-            }
-            .panel#partite .matches-title {
-                width: 100%;
-                text-align: center;
-            }
-            .panel#partite .settings-bar {
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
-            }
-            .panel#partite .settings-bar > * {
-                width: 100%;
-                max-width: 100%;
-            }
-            .panel#partite .pagination-container {
-                width: 100%;
-                justify-content: center;
-            }
-            
             .stats-grid { 
                 grid-template-columns: 1fr; 
                 gap: 12px; 
@@ -1477,53 +1433,48 @@
             border-radius: var(--radius-small);
         }
         
-        /* FIX 15: GRADIENTE CON DUE COLORI PER LE CARD SQUADRE */
-        .team-container {
-            position: relative;
-            overflow: hidden;
-        }
-        .team-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            opacity: 0.15;
-            z-index: 0;
-            pointer-events: none;
-        }
+        /* FIX 25: BORDO DOPPIO PER LE SQUADRE (invece del gradiente) */
         #teamAContainer {
-            border-left: 4px solid #e74c3c;
-        }
-        #teamAContainer::before {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border: 3px solid #e74c3c !important;
+            box-shadow: inset 0 0 0 2px #c0392b !important;
         }
         #teamBContainer {
-            border-left: 4px solid #3498db;
-        }
-        #teamBContainer::before {
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            border: 3px solid #3498db !important;
+            box-shadow: inset 0 0 0 2px #2980b9 !important;
         }
         #goalsAContainerWrapper {
-            border-left: 4px solid #e74c3c;
-        }
-        #goalsAContainerWrapper::before {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border: 3px solid #e74c3c !important;
+            box-shadow: inset 0 0 0 2px #c0392b !important;
         }
         #goalsBContainerWrapper {
-            border-left: 4px solid #3498db;
-        }
-        #goalsBContainerWrapper::before {
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            border: 3px solid #3498db !important;
+            box-shadow: inset 0 0 0 2px #2980b9 !important;
         }
         
-        .team-container > * {
-            position: relative;
-            z-index: 1;
+        .team-container {
+            background: rgba(240, 244, 248, 0.7) !important;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding: 20px;
+            border-radius: var(--radius-btn);
+            margin-bottom: 20px;
+        }
+        .team-container .team-title {
+            color: #000000 !important;
+            text-shadow: none !important;
+        }
+        .team-container .team-title * {
+            color: #000000 !important;
+            text-shadow: none !important;
+        }
+        .team-container .team-title .goal-count {
+            color: #ffffff !important;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.3) !important;
         }
         
-        /* FIX 12: Visualizzazione risultato su mobile con nomi squadra lunghi */
+        /* ============================================================
+           FIX 12: Visualizzazione risultato su mobile con nomi squadra lunghi
+           ============================================================ */
         @media (max-width: 768px) {
             .match-teams {
                 font-size: 0.9em !important;
@@ -1632,19 +1583,14 @@
             display: none !important;
         }
         
+        /* FIX 26: Rimuovere badge guanto vicino al nome in lista giocatori */
+        .player-card .player-info h3 .player-name-row .gk-badge-name {
+            display: none !important;
+        }
+        
         /* ============================================================
-           FIX 20: Indicazione "Nome squadra non modificabile" in Configurazione Squadre
+           FIX 23: Messaggio nomi squadra bloccati - versione semplificata
            ============================================================ */
-        .team-name-readonly {
-            background: #f0f0f0 !important;
-            color: #666 !important;
-            cursor: not-allowed !important;
-            opacity: 0.8 !important;
-        }
-        .team-name-readonly:focus {
-            border-color: #dce4ec !important;
-            box-shadow: none !important;
-        }
         .team-name-warning {
             display: block;
             margin-top: 4px;
@@ -1654,6 +1600,17 @@
         }
         .team-name-warning i {
             margin-right: 4px;
+        }
+        
+        .team-name-readonly {
+            background: #f0f0f0 !important;
+            color: #666 !important;
+            cursor: not-allowed !important;
+            opacity: 0.8 !important;
+        }
+        .team-name-readonly:focus {
+            border-color: #dce4ec !important;
+            box-shadow: none !important;
         }
         
         /* ============================================================
@@ -1889,32 +1846,33 @@
                 <div id="newMatchFormContainer" style="display:none;">
                     <h2><i class="fas fa-pen-alt"></i> Nuova Partita</h2>
                     
-                    <div class="team-container" id="teamAContainer" style="background: rgba(231, 76, 60, 0.12); border-left: 4px solid #e74c3c;">
+                    <!-- FIX 25: Bordo doppio per le squadre -->
+                    <div class="team-container" id="teamAContainer" style="border: 3px solid #e74c3c; box-shadow: inset 0 0 0 2px #c0392b;">
                         <div class="team-title">
                             <img id="teamALogoForm" src="" style="display:none;">
-                            <span id="teamANameForm" style="color:#ffffff; text-shadow: 0 1px 8px rgba(0,0,0,0.5);">Squadra A</span>
+                            <span id="teamANameForm" style="color:#000000; text-shadow: none;">Squadra A</span>
                             <span id="goalsACountNew" class="goal-count">0 goal</span>
                         </div>
                         <div id="teamASelectors" class="players-selector"></div>
                     </div>
                     
-                    <div class="team-container" id="teamBContainer" style="background: rgba(52, 152, 219, 0.12); border-left: 4px solid #3498db;">
+                    <div class="team-container" id="teamBContainer" style="border: 3px solid #3498db; box-shadow: inset 0 0 0 2px #2980b9;">
                         <div class="team-title">
                             <img id="teamBLogoForm" src="" style="display:none;">
-                            <span id="teamBNameForm" style="color:#ffffff; text-shadow: 0 1px 8px rgba(0,0,0,0.5);">Squadra B</span>
+                            <span id="teamBNameForm" style="color:#000000; text-shadow: none;">Squadra B</span>
                             <span id="goalsBCountNew" class="goal-count">0 goal</span>
                         </div>
                         <div id="teamBSelectors" class="players-selector"></div>
                     </div>
                     
-                    <div class="team-container" id="goalsAContainerWrapper" style="background: rgba(231, 76, 60, 0.08); border-left: 4px solid #e74c3c;">
-                        <div class="team-title"><i class="fas fa-futbol"></i> Goal <span id="teamANameGoalsA" style="color:#ffffff; text-shadow: 0 1px 8px rgba(0,0,0,0.5);">Squadra A</span></div>
+                    <div class="team-container" id="goalsAContainerWrapper" style="border: 3px solid #e74c3c; box-shadow: inset 0 0 0 2px #c0392b;">
+                        <div class="team-title"><i class="fas fa-futbol"></i> Goal <span id="teamANameGoalsA" style="color:#000000; text-shadow: none;">Squadra A</span></div>
                         <div id="goalsAContainer"></div>
                         <button type="button" class="add-goal-player-btn" onclick="addGoalPlayer('A')"><i class="fas fa-plus"></i> Aggiungi marcatore</button>
                     </div>
                     
-                    <div class="team-container" id="goalsBContainerWrapper" style="background: rgba(52, 152, 219, 0.08); border-left: 4px solid #3498db;">
-                        <div class="team-title"><i class="fas fa-futbol"></i> Goal <span id="teamANameGoalsB" style="color:#ffffff; text-shadow: 0 1px 8px rgba(0,0,0,0.5);">Squadra B</span></div>
+                    <div class="team-container" id="goalsBContainerWrapper" style="border: 3px solid #3498db; box-shadow: inset 0 0 0 2px #2980b9;">
+                        <div class="team-title"><i class="fas fa-futbol"></i> Goal <span id="teamANameGoalsB" style="color:#000000; text-shadow: none;">Squadra B</span></div>
                         <div id="goalsBContainer"></div>
                         <button type="button" class="add-goal-player-btn" onclick="addGoalPlayer('B')"><i class="fas fa-plus"></i> Aggiungi marcatore</button>
                     </div>
@@ -1986,10 +1944,10 @@
             <div id="squadre" class="panel">
                 <h2><i class="fas fa-sliders-h"></i> Configurazione Squadre</h2>
                 
-                <!-- FIX 20: Indicazione nomi squadra non modificabili -->
+                <!-- FIX 23: Messaggio semplificato nomi squadra bloccati -->
                 <div style="background: #f39c12; color: white; padding: 12px 18px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                     <i class="fas fa-info-circle" style="font-size: 1.4em;"></i>
-                    <span style="font-weight: 500;">⚠️ I nomi delle squadre possono essere impostati solo al momento della creazione del campionato e non possono più essere modificati. Puoi cambiare colori e logo in qualsiasi momento.</span>
+                    <span style="font-weight: 500;">⚠️ Il nome della squadra può essere impostato solo la prima volta che si crea il campionato. Dopo non può più essere modificato.</span>
                 </div>
                 
                 <div class="team-container">
@@ -1998,7 +1956,7 @@
                     <div class="form-group">
                         <label>Nome Squadra <span style="color:#f39c12; font-size:0.7em;">(bloccato)</span></label>
                         <input type="text" id="teamANameGlobal" placeholder="Nome Squadra A" readonly class="team-name-readonly">
-                        <span class="team-name-warning"><i class="fas fa-lock"></i> Il nome non può essere modificato dopo la creazione del campionato</span>
+                        <span class="team-name-warning"><i class="fas fa-lock"></i> Il nome non può più essere modificato</span>
                     </div>
                     <div class="form-group"><label>Colore Sociale 1</label><input type="color" id="teamAColor1" value="#e74c3c"></div>
                     <div class="form-group"><label>Colore Sociale 2</label><input type="color" id="teamAColor2" value="#c0392b"></div>
@@ -2010,7 +1968,7 @@
                     <div class="form-group">
                         <label>Nome Squadra <span style="color:#f39c12; font-size:0.7em;">(bloccato)</span></label>
                         <input type="text" id="teamBNameGlobal" placeholder="Nome Squadra B" readonly class="team-name-readonly">
-                        <span class="team-name-warning"><i class="fas fa-lock"></i> Il nome non può essere modificato dopo la creazione del campionato</span>
+                        <span class="team-name-warning"><i class="fas fa-lock"></i> Il nome non può più essere modificato</span>
                     </div>
                     <div class="form-group"><label>Colore Sociale 1</label><input type="color" id="teamBColor1" value="#3498db"></div>
                     <div class="form-group"><label>Colore Sociale 2</label><input type="color" id="teamBColor2" value="#2980b9"></div>
@@ -2820,7 +2778,6 @@
             showLoading(false);
             
             if (logoUrl) {
-                // FIX 11: Elimina solo se NON è lo stesso logo (evita loop)
                 if (team === 'A') {
                     const oldLogo = teamSettings.logoA;
                     if (oldLogo && oldLogo.includes('firebasestorage') && oldLogo !== logoUrl) {
@@ -3117,7 +3074,6 @@
             }
         }
 
-        // FIX 2: getRankingAvatarWithBadge - badge giallo uniforme, più piccolo (12px) nelle classifiche
         function getRankingAvatarWithBadge(player, size) {
             if (!player) return '';
             size = size || 50;
@@ -3152,6 +3108,7 @@
             return `<div class="player-name-main">${escapeHtml(nameParts.first)}</div>`;
         }
 
+        // FIX 26: Rimossa icona guanto (🧤) nella lista giocatori
         function updatePlayersList() {
             const container = document.getElementById('playersList');
             if (!container) return;
@@ -3184,15 +3141,14 @@
             container.innerHTML = html;
         }
 
+        // FIX 26: Rimossa icona guanto (🧤) nella lista giocatori
         function generatePlayerCard(p) {
-            const gkBadge = p.isGoalkeeper ? ' <span style="font-size:0.7em; background:#f1c40f; color:white; padding:2px 8px; border-radius:12px; font-weight:700;">🧤</span>' : '';
-            
             return `
                 <div class="player-card">
                     ${getPlayerCardAvatar(p)}
                     <div class="player-info">
                         <h3>
-                            <div class="player-name-row"><strong>${escapeHtml(p.name)}${gkBadge}</strong></div>
+                            <div class="player-name-row"><strong>${escapeHtml(p.name)}</strong></div>
                             <div class="player-badges-row"><span class="badge"><i class="fas fa-shirt jersey-icon"></i> ${p.number}</span>${p.isGoalkeeper ? '<span class="badge"><i class="fas fa-hand-paper hand-icon" style="color:#f1c40f;"></i> Portiere</span>' : '<span class="badge"><i class="fas fa-futbol ball-icon"></i> Calciatore</span>'}</div>
                         </h3>
                         <div class="player-stats">
@@ -3225,33 +3181,33 @@
             const bCol1 = document.getElementById('teamBColor1'); if (bCol1) bCol1.value = teamSettings.colorB1 || '#3498db';
             const bCol2 = document.getElementById('teamBColor2'); if (bCol2) bCol2.value = teamSettings.colorB2 || '#2980b9';
             
-            // FIX 5: Testo sempre bianco con text-shadow
+            // FIX 25: Testi neri per i container squadre (bordo doppio)
             const aForm = document.getElementById('teamANameForm');
             if (aForm) { 
                 aForm.textContent = teamSettings.nameA; 
-                aForm.style.color = '#ffffff';
-                aForm.style.textShadow = '0 1px 8px rgba(0,0,0,0.5)';
+                aForm.style.color = '#000000';
+                aForm.style.textShadow = 'none';
             }
             
             const bForm = document.getElementById('teamBNameForm');
             if (bForm) { 
                 bForm.textContent = teamSettings.nameB; 
-                bForm.style.color = '#ffffff';
-                bForm.style.textShadow = '0 1px 8px rgba(0,0,0,0.5)';
+                bForm.style.color = '#000000';
+                bForm.style.textShadow = 'none';
             }
             
             const aGoal = document.getElementById('teamANameGoalsA');
             if (aGoal) { 
                 aGoal.textContent = teamSettings.nameA; 
-                aGoal.style.color = '#ffffff';
-                aGoal.style.textShadow = '0 1px 8px rgba(0,0,0,0.5)';
+                aGoal.style.color = '#000000';
+                aGoal.style.textShadow = 'none';
             }
             
             const bGoal = document.getElementById('teamANameGoalsB');
             if (bGoal) { 
                 bGoal.textContent = teamSettings.nameB; 
-                bGoal.style.color = '#ffffff';
-                bGoal.style.textShadow = '0 1px 8px rgba(0,0,0,0.5)';
+                bGoal.style.color = '#000000';
+                bGoal.style.textShadow = 'none';
             }
             
             const logoAPreview = document.getElementById('teamALogoPreview');
@@ -3264,30 +3220,34 @@
             const goalsAContainerWrapper = document.getElementById('goalsAContainerWrapper');
             const goalsBContainerWrapper = document.getElementById('goalsBContainerWrapper');
             
-            // FIX 15: Gradiente con due colori per le card
+            // FIX 25: Bordo doppio per le squadre
             if (teamAContainer) {
                 const c1 = teamSettings.colorA1 || '#e74c3c';
                 const c2 = teamSettings.colorA2 || '#c0392b';
-                teamAContainer.style.background = `linear-gradient(135deg, ${c1}15, ${c2}15)`;
-                teamAContainer.style.borderLeft = `4px solid ${c1}`;
+                teamAContainer.style.border = `3px solid ${c1}`;
+                teamAContainer.style.boxShadow = `inset 0 0 0 2px ${c2}`;
+                teamAContainer.style.background = 'rgba(240, 244, 248, 0.7)';
             }
             if (teamBContainer) {
                 const c1 = teamSettings.colorB1 || '#3498db';
                 const c2 = teamSettings.colorB2 || '#2980b9';
-                teamBContainer.style.background = `linear-gradient(135deg, ${c1}15, ${c2}15)`;
-                teamBContainer.style.borderLeft = `4px solid ${c1}`;
+                teamBContainer.style.border = `3px solid ${c1}`;
+                teamBContainer.style.boxShadow = `inset 0 0 0 2px ${c2}`;
+                teamBContainer.style.background = 'rgba(240, 244, 248, 0.7)';
             }
             if (goalsAContainerWrapper) {
                 const c1 = teamSettings.colorA1 || '#e74c3c';
                 const c2 = teamSettings.colorA2 || '#c0392b';
-                goalsAContainerWrapper.style.background = `linear-gradient(135deg, ${c1}10, ${c2}10)`;
-                goalsAContainerWrapper.style.borderLeft = `4px solid ${c1}`;
+                goalsAContainerWrapper.style.border = `3px solid ${c1}`;
+                goalsAContainerWrapper.style.boxShadow = `inset 0 0 0 2px ${c2}`;
+                goalsAContainerWrapper.style.background = 'rgba(240, 244, 248, 0.7)';
             }
             if (goalsBContainerWrapper) {
                 const c1 = teamSettings.colorB1 || '#3498db';
                 const c2 = teamSettings.colorB2 || '#2980b9';
-                goalsBContainerWrapper.style.background = `linear-gradient(135deg, ${c1}10, ${c2}10)`;
-                goalsBContainerWrapper.style.borderLeft = `4px solid ${c1}`;
+                goalsBContainerWrapper.style.border = `3px solid ${c1}`;
+                goalsBContainerWrapper.style.boxShadow = `inset 0 0 0 2px ${c2}`;
+                goalsBContainerWrapper.style.background = 'rgba(240, 244, 248, 0.7)';
             }
             
             if (teamSettings.logoA) {
@@ -3303,8 +3263,6 @@
         function saveTeamSettings() {
             if (!isAdminMode) { showAlert('Sblocca la modalità Admin!', 'error'); return; }
             // FIX 10: Nomi squadra NON vengono salvati (sono readonly)
-            // teamSettings.nameA = document.getElementById('teamANameGlobal').value || 'Squadra A';
-            // teamSettings.nameB = document.getElementById('teamBNameGlobal').value || 'Squadra B';
             teamSettings.colorA1 = document.getElementById('teamAColor1').value;
             teamSettings.colorA2 = document.getElementById('teamAColor2').value;
             teamSettings.colorB1 = document.getElementById('teamBColor1').value;
@@ -3707,14 +3665,12 @@
                 const totalMatches = matches.length;
                 const giornata = totalMatches + 1;
                 
-                // FIX 4: Salva i nomi e colori attuali nella partita (congelati)
+                // FIX 22: Rimossa logica colori storici - uso sempre colori correnti
                 const match = {
                     id: Date.now(),
                     giornata: giornata,
                     teamAName: teamSettings.nameA,
                     teamBName: teamSettings.nameB,
-                    teamAColor: teamSettings.colorA1 || '#e74c3c',
-                    teamBColor: teamSettings.colorB1 || '#3498db',
                     teamA: teamAIds,
                     teamB: teamBIds,
                     goalsA: goalsA.length,
@@ -3766,8 +3722,9 @@
             document.getElementById('editMatchModal').style.display = 'flex';
             
             const allPlayers = getSortedPlayersWithGoalkeepersFirst();
-            const teamAColor = match.teamAColor || teamSettings.colorA1 || '#e74c3c';
-            const teamBColor = match.teamBColor || teamSettings.colorB1 || '#3498db';
+            // FIX 22: Usa sempre i colori correnti
+            const teamAColor = teamSettings.colorA1 || '#e74c3c';
+            const teamBColor = teamSettings.colorB1 || '#3498db';
             const teamAColorLight = teamAColor + '20';
             const teamBColorLight = teamBColor + '20';
             
@@ -4150,7 +4107,6 @@
                 match.field = field;
                 match.winner = goalsA.length > goalsB.length ? 'A' : (goalsB.length > goalsA.length ? 'B' : 'draw');
                 match.note = note.substring(0, 500);
-                // FIX 4: Mantieni i colori originali della partita (non sovrascrivere)
                 saveCampionatoData();
                 calculateAllStats();
                 updateAll();
@@ -4343,7 +4299,7 @@
                 return;
             }
             
-            // FIX 4: Usa i colori salvati nella partita, fallback ai colori correnti
+            // FIX 22: Usa sempre i colori correnti
             const teamAColor = teamSettings.colorA1 || '#e74c3c';
             const teamBColor = teamSettings.colorB1 || '#3498db';
             const teamALogo = teamSettings.logoA || '';
@@ -4352,9 +4308,9 @@
             let html = '';
             for (let i = 0; i < pageMatches.length; i++) {
                 const m = pageMatches[i];
-                // FIX 4: Usa i colori salvati nella partita (se presenti)
-                const matchAColor = m.teamAColor || teamAColor;
-                const matchBColor = m.teamBColor || teamBColor;
+                // FIX 22: Usa sempre i colori correnti
+                const matchAColor = teamAColor;
+                const matchBColor = teamBColor;
                 
                 const mvpP = players.find(p => p.id === m.mvp);
                 const bestGk = players.find(p => p.id === m.bestGoalkeeper);
@@ -4560,7 +4516,6 @@
                 const p = withGoals[i];
                 const media = p.matchesPlayed > 0 ? (p.goalsScored / p.matchesPlayed).toFixed(2) : '0.00';
                 const avatarHtml = getRankingAvatarWithBadge(p, 50);
-                // FIX 18: Rimossa icona portiere dopo il nome
                 const nameHtml = getPlayerNameHtml(p);
                 html += `<tr><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<div class="player-name-cell">${nameHtml}</div></div></td><td>${p.goalsScored}</td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
             }
@@ -4643,7 +4598,6 @@
                 const item = withAverage[i];
                 const p = item.player;
                 const avatarHtml = getRankingAvatarWithBadge(p, 50);
-                // FIX 18: Rimossa icona portiere dopo il nome
                 const nameHtml = getPlayerNameHtml(p);
                 
                 const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
@@ -4692,7 +4646,6 @@
                 const p = withPoints[i].player;
                 const points = withPoints[i].points;
                 const avatarHtml = getRankingAvatarWithBadge(p, 50);
-                // FIX 18: Rimossa icona portiere dopo il nome
                 const nameHtml = getPlayerNameHtml(p);
                 
                 const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
@@ -4728,7 +4681,6 @@
                 const p = gks[i];
                 const media = (p.goalsConceded / p.matchesAsGoalkeeper).toFixed(2);
                 const avatarHtml = getRankingAvatarWithBadge(p, 50);
-                // FIX 18: Rimossa icona portiere dopo il nome
                 const nameHtml = getPlayerNameHtml(p);
                 html += `<tr><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<div class="player-name-cell">${nameHtml}</div></div></td><td>${p.matchesAsGoalkeeper}</td><td>${p.goalsConceded}</td><td>${media}</td><td>${p.cleanSheets}</td></tr>`;
             }
@@ -4745,7 +4697,6 @@
                 const p = withAssists[i];
                 const media = p.matchesPlayed > 0 ? (p.assists / p.matchesPlayed).toFixed(2) : '0.00';
                 const avatarHtml = getRankingAvatarWithBadge(p, 50);
-                // FIX 18: Rimossa icona portiere dopo il nome
                 const nameHtml = getPlayerNameHtml(p);
                 html += `<tr><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<div class="player-name-cell">${nameHtml}</div></div></td><td>${p.assists}</td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
             }
@@ -4762,7 +4713,6 @@
                 const p = withMvp[i];
                 const media = p.matchesPlayed > 0 ? (p.mvpAwards / p.matchesPlayed).toFixed(2) : '0.00';
                 const avatarHtml = getRankingAvatarWithBadge(p, 50);
-                // FIX 18: Rimossa icona portiere dopo il nome
                 const nameHtml = getPlayerNameHtml(p);
                 html += `<tr><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<div class="player-name-cell">${nameHtml}</div></div></td><td>${p.mvpAwards}</td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
             }
@@ -4779,7 +4729,6 @@
                 const p = withAwards[i];
                 const media = p.matchesPlayed > 0 ? (p.bestGoalkeeperAwards / p.matchesPlayed).toFixed(2) : '0.00';
                 const avatarHtml = getRankingAvatarWithBadge(p, 50);
-                // FIX 18: Rimossa icona portiere dopo il nome
                 const nameHtml = getPlayerNameHtml(p);
                 html += `<tr><td>${i+1}</td><td><div class="ranking-player-cell">${avatarHtml}<div class="player-name-cell">${nameHtml}</div></div></td><td>${p.bestGoalkeeperAwards}</td><td>${p.matchesPlayed}</td><td>${media}</td></tr>`;
             }
@@ -4852,7 +4801,6 @@
                 }
             }
 
-            // FIX 16: Cerchio portiere giallo nelle statistiche
             function getBestPlayerHtml(player) {
                 if (!player || player.name === '---') return '---';
                 const avatarHtml = player.photo ?
@@ -4929,7 +4877,6 @@
             const p = top.player;
             const points = top.points;
             
-            // FIX 16: Cerchio portiere giallo
             const avatarHtml = p.photo ?
                 `<div class="big-avatar-wrapper"><img src="${p.photo}" class="ranking-avatar" style="width:70px;height:70px;border-radius:50%;border:3px solid white;object-fit:cover;">${p.isGoalkeeper ? `<div class="gk-badge" style="position:absolute;bottom:-2px;right:-2px;background:#f1c40f !important;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:5;"><i class="fas fa-hand-paper" style="font-size:14px;color:#ffffff !important;"></i></div>` : ''}</div>` :
                 `<div class="big-avatar-wrapper"><div class="ranking-avatar" style="width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2ecc71,#27ae60);color:white;font-size:28px;border:3px solid white;"><i class="fas fa-user"></i></div>${p.isGoalkeeper ? `<div class="gk-badge" style="position:absolute;bottom:-2px;right:-2px;background:#f1c40f !important;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);z-index:5;"><i class="fas fa-hand-paper" style="font-size:14px;color:#ffffff !important;"></i></div>` : ''}</div>`;
